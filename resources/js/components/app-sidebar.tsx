@@ -1,5 +1,5 @@
 import { Link } from '@inertiajs/react';
-import { BookOpen, ClipboardList, FolderGit2, LayoutGrid, FileText } from 'lucide-react';
+import { BookOpen, ClipboardList, FolderGit2, LayoutGrid, FileText, Newspaper } from 'lucide-react';
 import AppLogo from '@/components/app-logo';
 import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
@@ -23,20 +23,10 @@ const mainNavItems: NavItem[] = [
         icon: LayoutGrid,
     },
     {
-        title: 'Berita Acara',
-        href: '/berita-acara',
-        icon: ClipboardList,
+        title: 'Berita',
+        href: '/news',
+        icon: Newspaper,
     },
-    {
-        title: 'Data Center',
-        href: '/data-center',
-        icon: FileText,
-    },
-    // {
-    //     title: 'News',
-    //     href: '/news',
-    //     icon: BookOpen,
-    // },
 ];
 
 const footerNavItems: NavItem[] = [
