@@ -17,7 +17,7 @@ import {
     Tablet,
 } from 'lucide-react';
 
-// ─── Types ────────────────────────────────────────────────────────────────────
+
 
 interface TrafficStat {
     label: string;
@@ -50,7 +50,6 @@ interface Source {
     color: string;
 }
 
-// ─── Static demo data ─────────────────────────────────────────────────────────
 
 const trafficStats: TrafficStat[] = [
     { label: 'Total Berita', value: '1,284', change: 12.5, icon: Newspaper, color: 'text-violet-600 dark:text-violet-400', bg: 'bg-violet-100 dark:bg-violet-900/30' },
@@ -199,11 +198,11 @@ export default function Dashboard() {
         <>
             <Head title="Dashboard" />
 
-            <div className="flex flex-col gap-6 p-1">
+            <div className="flex flex-col gap-6 p-4">
 
                 {/* ── Header ────────────────────────────────────────── */}
                 <div className="flex flex-col gap-1">
-                    <h1 className="text-2xl font-bold tracking-tight">Dashboard</h1>
+                    <h1 className="text-2xl font-bold tracking-tight">Dashboard Baraya-News</h1>
                     <p className="text-sm text-muted-foreground">
                         Pantau performa dan traffic berita Anda secara real-time.
                     </p>
@@ -216,7 +215,7 @@ export default function Dashboard() {
                         const isUp = stat.change >= 0;
                         return (
                             <Card key={stat.label} className="relative overflow-hidden transition-shadow hover:shadow-md">
-                                <CardContent className="pt-6">
+                                <CardContent className="pt-1">
                                     <div className="flex items-center justify-between">
                                         <div className={`rounded-lg p-2 ${stat.bg}`}>
                                             <Icon className={`size-5 ${stat.color}`} />

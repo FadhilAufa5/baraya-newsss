@@ -7,11 +7,14 @@ export type User = {
     two_factor_enabled?: boolean;
     created_at: string;
     updated_at: string;
+    roles?: string[];
     [key: string]: unknown;
 };
 
 export type Auth = {
     user: User;
+    roles: string[];
+    permissions: string[];
 };
 
 /* @chisel-passkeys */

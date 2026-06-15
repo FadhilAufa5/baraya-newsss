@@ -54,7 +54,7 @@ interface Props {
     categories: string[];
 }
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
+
 
 const STATUS_CONFIG = {
     draft:     { label: 'Draft',  cls: 'bg-slate-100 text-slate-600 border border-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700' },
@@ -376,29 +376,29 @@ export default function NewsIndex({ news, filters, categories }: Props) {
                 />
             )}
 
-            <div className="flex flex-col gap-8">
+            <div className="flex flex-col gap-6 p-4">
 
                 {/* ── Masthead ─────────────────────────────────────────── */}
-                <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-red-700 via-red-600 to-rose-700 px-7 py-6 shadow-lg">
+                <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-gray-700 via-gray-600 to-gray-700 px-7 py-6 shadow-lg">
                     {/* Decorative blobs */}
                     <div className="pointer-events-none absolute -top-8 -right-8 size-40 rounded-full bg-white/5 blur-3xl" />
                     <div className="pointer-events-none absolute bottom-0 left-1/2 size-32 rounded-full bg-white/5 blur-2xl" />
 
                     <div className="relative flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
                         <div>
-                            <p className="mb-1 text-[11px] font-bold uppercase tracking-[0.18em] text-red-200">
+                            <p className="mb-1 text-[11px] font-bold uppercase tracking-[0.18em] text-white">
                                 Portal Berita
                             </p>
                             <h1 className="text-3xl font-extrabold tracking-tight text-white">
                                 Baraya News
                             </h1>
-                            <p className="mt-1 text-sm text-red-200/80">
+                            <p className="mt-1 text-sm text-white/80">
                                 Berita terkini, terpercaya, dan terlengkap
                             </p>
                         </div>
                         <Button
                             asChild
-                            className="shrink-0 gap-2 bg-white text-red-700 hover:bg-red-50 font-bold shadow-md px-5 self-start"
+                            className="shrink-0 gap-2 bg-white text-gray-700 hover:bg-red-50 font-bold shadow-md px-5 self-start"
                         >
                             <Link href="/news/create"><Plus className="size-4" />Tulis Artikel</Link>
                         </Button>
@@ -472,7 +472,7 @@ export default function NewsIndex({ news, filters, categories }: Props) {
                         <Button
                             id="btn-search"
                             onClick={() => applyFilter()}
-                            className="h-10 shrink-0 rounded-xl bg-red-600 hover:bg-red-700 px-5"
+                            className="h-10 shrink-0 rounded-xl bg-gray-600 hover:bg-gray-800 px-5"
                         >
                             Cari
                         </Button>
@@ -511,9 +511,9 @@ export default function NewsIndex({ news, filters, categories }: Props) {
                     </div>
                 )}
 
-                {/* ── Content ──────────────────────────────────────────── */}
+                {/* konten */}
                 {news.data.length === 0 ? (
-                    /* Empty state */
+                    
                     <div className="flex flex-col items-center justify-center gap-5 rounded-2xl border border-dashed border-border/70 bg-muted/20 py-24 text-center">
                         <div className="flex size-18 items-center justify-center rounded-2xl bg-muted shadow-inner">
                             <FileX className="size-9 text-muted-foreground/40" />
