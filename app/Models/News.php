@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Str;
 
 class News extends Model
@@ -21,6 +22,8 @@ class News extends Model
         'content',
         'image',
         'image_caption',
+        'short_video',
+        'short_video_caption',
         'meta_description',
         'tags',
         'status',
@@ -31,8 +34,8 @@ class News extends Model
     ];
 
     protected $casts = [
-        'tags'         => 'array',
-        'is_featured'  => 'boolean',
+        'tags' => 'array',
+        'is_featured' => 'boolean',
         'published_at' => 'datetime',
     ];
 
@@ -41,6 +44,11 @@ class News extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function comments(): HasMany
+    {
+        return $this->hasMany(Comment::class);
     }
 
     // ─── Scopes ─────────────────────────────────────────────────
@@ -63,7 +71,7 @@ class News extends Model
         $original = $slug;
         $count = 1;
 
-        while (static::where('slug', $slug)->when($exceptId, fn($q) => $q->where('id', '!=', $exceptId))->exists()) {
+        while (static::where('slug', $slug)->when($exceptId, fn ($q) => $q->where('id', '!=', $exceptId))->exists()) {
             $slug = "{$original}-{$count}";
             $count++;
         }
@@ -74,6 +82,7 @@ class News extends Model
     public static function estimateReadingTime(string $content): int
     {
         $wordCount = str_word_count(strip_tags($content));
+
         return max(1, (int) ceil($wordCount / 200)); // avg 200 wpm
     }
 }

@@ -26,8 +26,8 @@ class NewsController extends Controller
             $search = $request->search;
             $query->where(function ($q) use ($search) {
                 $q->where('title', 'like', "%{$search}%")
-                  ->orWhere('author', 'like', "%{$search}%")
-                  ->orWhere('excerpt', 'like', "%{$search}%");
+                    ->orWhere('author', 'like', "%{$search}%")
+                    ->orWhere('excerpt', 'like', "%{$search}%");
             });
         }
 
@@ -42,8 +42,8 @@ class NewsController extends Controller
         $news = $query->paginate(12)->withQueryString();
 
         return Inertia::render('news/index', [
-            'news'       => $news,
-            'filters'    => $request->only(['search', 'category', 'status']),
+            'news' => $news,
+            'filters' => $request->only(['search', 'category', 'status']),
             'categories' => self::CATEGORIES,
         ]);
     }
@@ -83,6 +83,10 @@ class NewsController extends Controller
             $data['image'] = $request->file('image')->store('news', 'public');
         }
 
+        if ($request->hasFile('short_video')) {
+            $data['short_video'] = $request->file('short_video')->store('news/videos', 'public');
+        }
+
         News::create($data);
 
         Inertia::flash('toast', ['type' => 'success', 'message' => 'Artikel berhasil disimpan.']);
@@ -96,15 +100,16 @@ class NewsController extends Controller
         $news->increment('views');
 
         return Inertia::render('news/show', [
-            'article'    => $news->load('user'),
+            'article' => $news->load(['user', 'comments.user']),
             'categories' => self::CATEGORIES,
+            'canManageComments' => auth()->user()?->can('delete news') ?? false,
         ]);
     }
 
     public function edit(News $news)
     {
         return Inertia::render('news/edit', [
-            'article'    => $news,
+            'article' => $news,
             'categories' => self::CATEGORIES,
         ]);
     }
@@ -127,7 +132,7 @@ class NewsController extends Controller
         }
 
         // Auto published_at if changing to published
-        if ($data['status'] === 'published' && empty($data['published_at']) && !$news->published_at) {
+        if ($data['status'] === 'published' && empty($data['published_at']) && ! $news->published_at) {
             $data['published_at'] = now();
         }
 
@@ -137,6 +142,13 @@ class NewsController extends Controller
                 Storage::disk('public')->delete($news->image);
             }
             $data['image'] = $request->file('image')->store('news', 'public');
+        }
+
+        if ($request->hasFile('short_video')) {
+            if ($news->short_video) {
+                Storage::disk('public')->delete($news->short_video);
+            }
+            $data['short_video'] = $request->file('short_video')->store('news/videos', 'public');
         }
 
         $news->update($data);
@@ -150,6 +162,10 @@ class NewsController extends Controller
     {
         if ($news->image) {
             Storage::disk('public')->delete($news->image);
+        }
+
+        if ($news->short_video) {
+            Storage::disk('public')->delete($news->short_video);
         }
 
         $news->delete();

@@ -6,6 +6,7 @@ namespace App\Models;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Fortify\Contracts\PasskeyUser;
@@ -16,7 +17,7 @@ use Spatie\Permission\Traits\HasRoles;
 class User extends Authenticatable implements PasskeyUser
 {
     /** @use HasFactory<UserFactory> */
-    use HasFactory, Notifiable, PasskeyAuthenticatable, TwoFactorAuthenticatable, HasRoles;
+    use HasFactory, HasRoles, Notifiable, PasskeyAuthenticatable, TwoFactorAuthenticatable;
 
     #[Hidden(['password', 'two_factor_secret', 'two_factor_recovery_codes', 'remember_token'])]
     protected $fillable = [
@@ -42,8 +43,18 @@ class User extends Authenticatable implements PasskeyUser
     /**
      * Get all news articles by this user.
      */
-    public function news(): \Illuminate\Database\Eloquent\Relations\HasMany
+    public function news(): HasMany
     {
         return $this->hasMany(News::class);
+    }
+
+    public function comments(): HasMany
+    {
+        return $this->hasMany(Comment::class);
+    }
+
+    public function shortVideos(): HasMany
+    {
+        return $this->hasMany(ShortVideo::class);
     }
 }

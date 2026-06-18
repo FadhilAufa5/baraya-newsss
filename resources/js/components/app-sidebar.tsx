@@ -1,5 +1,5 @@
 import { Link, usePage } from '@inertiajs/react';
-import { BookOpen, FolderGit2, LayoutGrid, Newspaper, Shield, Users } from 'lucide-react';
+import { LayoutGrid, MessageSquare, Newspaper, Shield, Users, Video } from 'lucide-react';
 import AppLogo from '@/components/app-logo';
 import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
@@ -23,11 +23,27 @@ const mainNavItems: NavItem[] = [
         href: dashboard(),
         icon: LayoutGrid,
     },
+];
+
+const featureNavItems: NavItem[] = [
     {
         title: 'Berita',
         href: '/news',
         icon: Newspaper,
     },
+    {
+        title: 'Short Video',
+        href: '/short-videos',
+        icon: Video,
+    },
+    {
+        title: 'Komentar',
+        href: '/comments',
+        icon: MessageSquare,
+    },
+];
+
+const userNavItems: NavItem[] = [
     {
         title: 'Manajemen User',
         href: '/users',
@@ -48,7 +64,7 @@ export function AppSidebar() {
     const roles = auth?.roles || [];
     const isSuperAdmin = roles.includes('Super Admin');
 
-    const filteredNavItems = mainNavItems.filter((item) => {
+    const filteredUserNavItems = userNavItems.filter((item) => {
         if (item.href === '/users') {
             return isSuperAdmin || permissions.includes('manage users');
         }
@@ -73,7 +89,11 @@ export function AppSidebar() {
             </SidebarHeader>
 
             <SidebarContent>
-                <NavMain items={filteredNavItems} />
+                <NavMain items={mainNavItems} />
+                <NavMain items={featureNavItems} label="Fitur" />
+                {filteredUserNavItems.length > 0 && (
+                    <NavMain items={filteredUserNavItems} label="User Manage" />
+                )}
             </SidebarContent>
 
             <SidebarFooter>
