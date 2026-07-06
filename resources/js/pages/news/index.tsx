@@ -363,7 +363,7 @@ export default function NewsIndex({ news, filters, categories }: Props) {
     const [featured, ...rest] = news.data;
     const isFirstPage = news.current_page === 1;
     const articlesInGrid = isFirstPage ? rest : news.data;
-
+    
     return (
         <>
             <Head title="Portal Berita" />

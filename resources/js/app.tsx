@@ -11,8 +11,9 @@ const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 createInertiaApp({
     title: (title) => (title ? `${title} - ${appName}` : appName),
     layout: (name) => {
+        console.log('Inertia layout name:', name);
         switch (true) {
-            case name === 'welcome':
+            case name === 'welcome' || name.includes('public'):
                 return null;
             case name.startsWith('auth/'):
                 return AuthLayout;

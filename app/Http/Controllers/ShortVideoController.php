@@ -32,6 +32,26 @@ class ShortVideoController extends Controller
         ]);
     }
 
+    public function publicIndex(Request $request)
+    {
+        $query = ShortVideo::with('user')
+            ->where('status', 'published')
+            ->latest('published_at');
+
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('title', 'like', "%{$search}%")
+                    ->orWhere('description', 'like', "%{$search}%");
+            });
+        }
+
+        return Inertia::render('short-videos/public', [
+            'videos' => $query->paginate(20)->withQueryString(),
+            'filters' => $request->only(['search']),
+        ]);
+    }
+
     public function create()
     {
         return Inertia::render('short-videos/create');
