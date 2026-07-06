@@ -10,7 +10,7 @@ interface ShortVideo {
     status: string;
     published_at: string | null;
     views: number;
-    user?: { name: string };
+    // user?: { name: string };
     created_at: string;
 }
 
@@ -136,9 +136,9 @@ export function VideoModal({
                     <div className="flex items-center gap-3 text-[10px] text-gray-400">
                         <span className="flex items-center gap-1"><Eye className="size-3" />{formatViews(video.views ?? 0)} views</span>
                         <span className="flex items-center gap-1"><Clock className="size-3" />{formatDate(video.published_at)}</span>
-                        <span className="ml-auto">{video.user?.name ?? 'Redaksi'}</span>
+                        {/* <span className="ml-auto">{video.user?.name ?? 'Redaksi'}</span> */}
                     </div>
-                    <p className="text-[9px] text-gray-400 text-center">ESC untuk tutup · ← → navigasi</p>
+                    <p className="text-[9px] text-gray-400 text-center">ESC untuk tutup</p>
                 </div>
             </div>
         </div>

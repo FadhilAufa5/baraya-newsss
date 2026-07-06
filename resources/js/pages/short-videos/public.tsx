@@ -27,7 +27,7 @@ interface PaginatedData {
     total: number;
     links: { url: string | null; label: string; active: boolean }[];
 }
-
+// 
 interface Props {
     videos: PaginatedData;
     filters: { search?: string };
@@ -101,13 +101,13 @@ export default function PublicShortVideos({ videos, filters }: Props) {
                         <div className="absolute top-0 right-0 -mt-4 -mr-4 w-60 h-60 bg-white/5 rounded-full blur-3xl pointer-events-none" />
                         <div className="relative z-10 max-w-xl space-y-2">
                             <span className="inline-block rounded-full bg-white/20 px-3 py-1 text-[10px] font-black uppercase tracking-widest">
-                                Baraya Shorts 🎬
+                                Baraya Video-Shorts 🎬
                             </span>
                             <h2 className="text-2xl sm:text-4xl font-extrabold leading-tight tracking-tight">
-                                Inspirasi & Informasi Jawa Barat dalam 60 Detik!
+                                Video Berita Terbaru
                             </h2>
                             <p className="text-xs sm:text-sm text-red-100 leading-relaxed font-medium">
-                                Jelajahi ragam konten video pendek kreatif terkurasi dari kontributor dan redaksi kami seputar pariwisata, budaya, kuliner, ekonomi, dan berita terkini.
+                                Berita singkat. Informasi cepat. Tetap terhubung dengan peristiwa terkini.
                             </p>
                         </div>
                     </div>
@@ -151,7 +151,7 @@ export default function PublicShortVideos({ videos, filters }: Props) {
                             </div>
 
                             {/* Statistics Widget */}
-                            <div className="rounded-xl bg-gradient-to-br from-gray-900 to-slate-950 p-4 text-white shadow-sm border border-gray-850">
+                            {/* <div className="rounded-xl bg-gradient-to-br from-gray-900 to-slate-950 p-4 text-white shadow-sm border border-gray-850">
                                 <h3 className="text-xs font-black uppercase tracking-wider text-red-400 mb-3">Statistik Shorts</h3>
                                 <div className="grid grid-cols-2 gap-3 text-center">
                                     <div className="bg-white/5 rounded-lg p-2.5">
@@ -163,7 +163,7 @@ export default function PublicShortVideos({ videos, filters }: Props) {
                                         <div className="text-[8px] text-gray-400 uppercase font-bold tracking-wide">Short Views</div>
                                     </div>
                                 </div>
-                            </div>
+                            </div> */}
                         </div>
 
                         {/* Right Side Main Content Grid */}
@@ -180,7 +180,7 @@ export default function PublicShortVideos({ videos, filters }: Props) {
                                     </span>
                                 </div>
                                 <span className="text-xs font-bold text-gray-400 hidden sm:inline">
-                                    Menampilkan {videos.data.length} dari {videos.total} item
+                                    Menampilkan {videos.data.length} dari {videos.total} video
                                 </span>
 
                                 {/* Mobile search wrapper */}
