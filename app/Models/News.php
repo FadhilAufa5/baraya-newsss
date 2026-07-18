@@ -31,6 +31,7 @@ class News extends Model
         'published_at',
         'views',
         'reading_time',
+        'likes_count',
     ];
 
     protected $casts = [
@@ -49,6 +50,28 @@ class News extends Model
     public function comments(): HasMany
     {
         return $this->hasMany(Comment::class);
+    }
+
+    public function likes(): \Illuminate\Database\Eloquent\Relations\MorphMany
+    {
+        return $this->morphMany(Like::class, 'likeable');
+    }
+
+    public function isLikedBy($user): bool
+    {
+        if (!$user) return false;
+        return $this->likes()->where('user_id', $user->id)->exists();
+    }
+
+    public function bookmarks(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(Bookmark::class);
+    }
+
+    public function isBookmarkedBy($user): bool
+    {
+        if (!$user) return false;
+        return $this->bookmarks()->where('user_id', $user->id)->exists();
     }
 
     // ─── Scopes ─────────────────────────────────────────────────

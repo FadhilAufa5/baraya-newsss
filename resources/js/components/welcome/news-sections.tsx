@@ -8,7 +8,7 @@ interface Article {
     id: number;
     category: string;
     title: string;
-    excerpt?: string;
+    excerpt?: string | null;
     published_at: string;
     views?: number;
     image?: string | null;
@@ -23,7 +23,7 @@ interface VideoStory {
 
 interface NewsSectionsProps {
     beritaTerbaru: Article[];
-    pilihanRedaksi: Article & { author?: string; excerpt?: string };
+    pilihanRedaksi: Article & { author?: string | null; excerpt?: string | null };
     videoStories: VideoStory[];
     beritaTerpopuler: { id: number; title: string; published_at: string }[];
 }
@@ -64,9 +64,17 @@ export function NewsSections({
 
                 <div className="space-y-4">
                     {beritaTerbaru.map((art) => (
-                        <div key={art.id} className="group flex gap-3 rounded-xl bg-white dark:bg-gray-800 shadow-sm overflow-hidden hover:shadow-md transition-shadow cursor-pointer">
+                        <a key={art.id} href={`/news/${art.id}`} className="group flex gap-3 rounded-xl bg-white dark:bg-gray-800 shadow-sm overflow-hidden hover:shadow-md transition-shadow cursor-pointer">
                             <div className="w-28 shrink-0 sm:w-32">
-                                <GradientPlaceholder category={art.category} className="w-full h-full min-h-[90px]" />
+                                {art.image ? (
+                                    <img
+                                        src={art.image}
+                                        alt={art.title}
+                                        className="w-full h-full min-h-[90px] object-cover"
+                                    />
+                                ) : (
+                                    <GradientPlaceholder category={art.category} className="w-full h-full min-h-[90px]" />
+                                )}
                             </div>
                             <div className="flex flex-col justify-center py-3 pr-3 gap-1.5">
                                 <CategoryBadge category={art.category} size="xs" />
@@ -79,7 +87,7 @@ export function NewsSections({
                                     {art.published_at}
                                 </span>
                             </div>
-                        </div>
+                        </a>
                     ))}
                     <button className="w-full rounded-xl border border-dashed border-gray-300 py-3 text-sm font-semibold text-gray-500 hover:border-red-400 hover:text-red-600 dark:border-gray-600 dark:text-gray-400 transition-colors flex items-center justify-center gap-2">
                         Lihat Semua Berita <ChevronRight className="size-4" />
@@ -94,9 +102,17 @@ export function NewsSections({
                     <h2 className="text-sm font-black uppercase tracking-wide text-gray-800 dark:text-gray-100">Pilihan Redaksi</h2>
                 </div>
 
-                <div className="group cursor-pointer rounded-xl bg-white dark:bg-gray-800 shadow-sm overflow-hidden hover:shadow-md transition-shadow">
+                <a href={`/news/${pilihanRedaksi.id}`} className="group cursor-pointer rounded-xl bg-white dark:bg-gray-800 shadow-sm overflow-hidden hover:shadow-md transition-shadow block">
                     <div className="relative aspect-video w-full">
-                        <GradientPlaceholder category={pilihanRedaksi.category} className="w-full h-full" />
+                        {pilihanRedaksi.image ? (
+                            <img
+                                src={pilihanRedaksi.image}
+                                alt={pilihanRedaksi.title}
+                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                            />
+                        ) : (
+                            <GradientPlaceholder category={pilihanRedaksi.category} className="w-full h-full" />
+                        )}
                         <div className="absolute inset-0 flex items-center justify-center">
                             <div className="flex size-12 items-center justify-center rounded-full bg-white/20 backdrop-blur-sm ring-2 ring-white/40 transition-transform group-hover:scale-110">
                                 <Play className="size-6 text-white fill-white ml-0.5" />
@@ -115,7 +131,7 @@ export function NewsSections({
                             {pilihanRedaksi.published_at}
                         </div>
                     </div>
-                </div>
+                </a>
 
                 {/* Video Story mini */}
                 <div className="mt-5">
@@ -159,7 +175,7 @@ export function NewsSections({
 
                 <div className="rounded-xl bg-white dark:bg-gray-800 shadow-sm overflow-hidden divide-y divide-gray-100 dark:divide-gray-700">
                     {beritaTerpopuler.map((art, idx) => (
-                        <div key={art.id} className="group flex items-start gap-3 px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-750 cursor-pointer transition-colors">
+                        <a key={art.id} href={`/news/${art.id}`} className="group flex items-start gap-3 px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-750 cursor-pointer transition-colors">
                             <span className={`shrink-0 text-3xl font-black leading-none ${idx === 0 ? 'text-red-600' : idx === 1 ? 'text-orange-400' : idx === 2 ? 'text-amber-400' : 'text-gray-300 dark:text-gray-600'}`}>
                                 {idx + 1}
                             </span>
@@ -172,7 +188,7 @@ export function NewsSections({
                                     {art.published_at}
                                 </span>
                             </div>
-                        </div>
+                        </a>
                     ))}
                 </div>
 

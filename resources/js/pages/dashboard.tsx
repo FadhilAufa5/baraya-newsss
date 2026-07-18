@@ -60,46 +60,42 @@ interface Source {
     color: string;
 }
 
+interface BackendSource {
+    name: string;
+    percent: number;
+    icon: string;
+    color: string;
+}
 
-const trafficStats: TrafficStat[] = [
-    { label: 'Total Berita', value: '1,284', change: 12.5, icon: Newspaper, color: 'text-violet-600 dark:text-violet-400', bg: 'bg-violet-100 dark:bg-violet-900/30' },
-    { label: 'Pageviews', value: '482,391', change: 8.1, icon: Eye, color: 'text-blue-600 dark:text-blue-400', bg: 'bg-blue-100 dark:bg-blue-900/30' },
-    { label: 'Pengunjung Unik', value: '97,204', change: -3.2, icon: Users, color: 'text-emerald-600 dark:text-emerald-400', bg: 'bg-emerald-100 dark:bg-emerald-900/30' },
-    { label: 'Klik Artikel', value: '34,820', change: 21.4, icon: MousePointerClick, color: 'text-amber-600 dark:text-amber-400', bg: 'bg-amber-100 dark:bg-amber-900/30' },
-];
+interface NotificationItem {
+    id: string;
+    title: string;
+    description: string;
+    time: string;
+    type: 'comment' | 'article' | 'system';
+    read: boolean;
+}
 
-const weeklyTraffic: TrafficPoint[] = [
-    { day: 'Sen', visits: 4200, pageviews: 9100 },
-    { day: 'Sel', visits: 5800, pageviews: 13400 },
-    { day: 'Rab', visits: 4900, pageviews: 10200 },
-    { day: 'Kam', visits: 7100, pageviews: 16800 },
-    { day: 'Jum', visits: 8400, pageviews: 19300 },
-    { day: 'Sab', visits: 6200, pageviews: 14100 },
-    { day: 'Min', visits: 5300, pageviews: 11900 },
-];
+interface DashboardProps {
+    stats: {
+        totalNews: { value: string; change: number };
+        pageviews: { value: string; change: number };
+        uniqueVisitors: { value: string; change: number };
+        totalComments: { value: string; change: number };
+    };
+    weeklyTraffic: TrafficPoint[];
+    trafficSources: BackendSource[];
+    recentArticles: Article[];
+    topArticles: { title: string; views: number; trend: number }[];
+    notifications: NotificationItem[];
+}
 
-const recentArticles: Article[] = [
-    { id: 1, title: 'Pemerintah Umumkan Kebijakan Energi Terbarukan', category: 'Politik', views: 12840, status: 'published', date: '15 Jun 2026' },
-    { id: 2, title: 'Timnas Indonesia Menang di Kualifikasi Piala Dunia', category: 'Olahraga', views: 29100, status: 'published', date: '14 Jun 2026' },
-    { id: 3, title: 'Teknologi AI Transformasi Industri Kesehatan', category: 'Teknologi', views: 8760, status: 'published', date: '14 Jun 2026' },
-    { id: 4, title: 'IHSG Menguat di Tengah Ketidakpastian Global', category: 'Ekonomi', views: 5430, status: 'published', date: '13 Jun 2026' },
-    { id: 5, title: 'Festival Budaya Nusantara 2026 Resmi Dibuka', category: 'Budaya', views: 3210, status: 'draft', date: '13 Jun 2026' },
-    { id: 6, title: 'Gempa Bumi 5,2 SR Guncang Sulawesi Tengah', category: 'Nasional', views: 41200, status: 'published', date: '12 Jun 2026' },
-];
-
-const topArticles: { title: string; views: number; trend: number }[] = [
-    { title: 'Gempa Bumi 5,2 SR Guncang Sulawesi Tengah', views: 41200, trend: 18 },
-    { title: 'Timnas Indonesia Menang di Kualifikasi Piala Dunia', views: 29100, trend: 34 },
-    { title: 'Pemerintah Umumkan Kebijakan Energi Terbarukan', views: 12840, trend: -5 },
-    { title: 'Teknologi AI Transformasi Industri Kesehatan', views: 8760, trend: 12 },
-    { title: 'IHSG Menguat di Tengah Ketidakpastian Global', views: 5430, trend: 7 },
-];
-
-const trafficSources: Source[] = [
-    { name: 'Desktop', percent: 54, icon: Monitor, color: 'bg-violet-500' },
-    { name: 'Mobile', percent: 38, icon: Smartphone, color: 'bg-blue-500' },
-    { name: 'Tablet', percent: 8, icon: Tablet, color: 'bg-emerald-500' },
-];
+const sourceIconMap: Record<string, React.ElementType> = {
+    Monitor,
+    Smartphone,
+    Tablet,
+    Globe,
+};
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -203,52 +199,57 @@ function AreaChart({ data }: { data: TrafficPoint[] }) {
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
-interface NotificationItem {
-    id: string;
-    title: string;
-    description: string;
-    time: string;
-    type: 'comment' | 'article' | 'system';
-    read: boolean;
-}
-
-const initialNotifications: NotificationItem[] = [
-    {
-        id: '1',
-        title: 'Komentar Baru',
-        description: 'Budi Hartono meninggalkan komentar pada artikel "Timnas Indonesia Menang".',
-        time: '1 menit yang lalu',
-        type: 'comment',
-        read: false,
-    },
-    {
-        id: '2',
-        title: 'Artikel Terbit',
-        description: 'Artikel "Pemerintah Umumkan Kebijakan Energi Terbarukan" telah tayang.',
-        time: '2 jam yang lalu',
-        type: 'article',
-        read: false,
-    },
-    {
-        id: '3',
-        title: 'Pembaruan Sistem',
-        description: 'Pemeliharaan server terjadwal untuk hari Minggu pukul 02.00 WIB.',
-        time: '1 hari yang lalu',
-        type: 'system',
-        read: true,
-    },
-    {
-        id: '4',
-        title: 'Penulis Baru',
-        description: 'Siti Aminah telah mendaftar sebagai penulis baru di tim Anda.',
-        time: '2 hari yang lalu',
-        type: 'system',
-        read: true,
-    },
-];
-
-export default function Dashboard() {
+export default function Dashboard({
+    stats,
+    weeklyTraffic,
+    trafficSources: backendTrafficSources,
+    recentArticles,
+    topArticles,
+    notifications: initialNotifications,
+}: DashboardProps) {
     const [notifications, setNotifications] = useState<NotificationItem[]>(initialNotifications);
+
+    const trafficStats: TrafficStat[] = [
+        {
+            label: 'Total Berita',
+            value: stats.totalNews.value,
+            change: stats.totalNews.change,
+            icon: Newspaper,
+            color: 'text-violet-600 dark:text-violet-400',
+            bg: 'bg-violet-100 dark:bg-violet-900/30',
+        },
+        {
+            label: 'Pageviews',
+            value: stats.pageviews.value,
+            change: stats.pageviews.change,
+            icon: Eye,
+            color: 'text-blue-600 dark:text-blue-400',
+            bg: 'bg-blue-100 dark:bg-blue-900/30',
+        },
+        {
+            label: 'Pengunjung Unik',
+            value: stats.uniqueVisitors.value,
+            change: stats.uniqueVisitors.change,
+            icon: Users,
+            color: 'text-emerald-600 dark:text-emerald-400',
+            bg: 'bg-emerald-100 dark:bg-emerald-900/30',
+        },
+        {
+            label: 'Total Komentar',
+            value: stats.totalComments.value,
+            change: stats.totalComments.change,
+            icon: MessageSquare,
+            color: 'text-amber-600 dark:text-amber-400',
+            bg: 'bg-amber-100 dark:bg-amber-900/30',
+        },
+    ];
+
+    const trafficSources: Source[] = (backendTrafficSources || []).map((src) => ({
+        name: src.name,
+        percent: src.percent,
+        icon: sourceIconMap[src.icon] || Globe,
+        color: src.color,
+    }));
 
     const unreadCount = notifications.filter((n) => !n.read).length;
 

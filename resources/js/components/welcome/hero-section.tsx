@@ -7,8 +7,8 @@ interface Article {
     id: number;
     category: string;
     title: string;
-    excerpt?: string;
-    author?: string;
+    excerpt?: string | null;
+    author?: string | null;
     published_at: string;
     views?: number;
     reading_time?: number;
@@ -25,9 +25,17 @@ export function HeroSection({ heroArticle, sideArticles }: HeroSectionProps) {
     return (
         <section className="grid grid-cols-1 gap-4 lg:grid-cols-3">
             {/* Hero Article */}
-            <div className="lg:col-span-2 group relative overflow-hidden rounded-xl shadow-md cursor-pointer">
-                <div className="aspect-video w-full">
-                    <GradientPlaceholder category={heroArticle.category} className="w-full h-full" />
+            <a href={`/news/${heroArticle.id}`} className="lg:col-span-2 group relative overflow-hidden rounded-xl shadow-md cursor-pointer block">
+                <div className="aspect-[4/3] sm:aspect-video w-full">
+                    {heroArticle.image ? (
+                        <img
+                            src={heroArticle.image}
+                            alt={heroArticle.title}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        />
+                    ) : (
+                        <GradientPlaceholder category={heroArticle.category} className="w-full h-full" />
+                    )}
                 </div>
                 {/* Overlay */}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
@@ -58,14 +66,22 @@ export function HeroSection({ heroArticle, sideArticles }: HeroSectionProps) {
                         )}
                     </div>
                 </div>
-            </div>
+            </a>
 
             {/* Side Articles */}
             <div className="flex flex-col gap-3">
                 {sideArticles.map((art) => (
-                    <div key={art.id} className="group flex gap-3 rounded-xl bg-white dark:bg-gray-800 shadow-sm overflow-hidden hover:shadow-md transition-shadow cursor-pointer">
+                    <a key={art.id} href={`/news/${art.id}`} className="group flex gap-3 rounded-xl bg-white dark:bg-gray-800 shadow-sm overflow-hidden hover:shadow-md transition-shadow cursor-pointer">
                         <div className="w-24 shrink-0 sm:w-28">
-                            <GradientPlaceholder category={art.category} className="w-full h-full min-h-[80px]" />
+                            {art.image ? (
+                                <img
+                                    src={art.image}
+                                    alt={art.title}
+                                    className="w-full h-full min-h-[80px] object-cover"
+                                />
+                            ) : (
+                                <GradientPlaceholder category={art.category} className="w-full h-full min-h-[80px]" />
+                            )}
                         </div>
                         <div className="flex flex-col justify-center py-3 pr-3 gap-1.5">
                             <CategoryBadge category={art.category} size="xs" />
@@ -77,7 +93,7 @@ export function HeroSection({ heroArticle, sideArticles }: HeroSectionProps) {
                                 {art.published_at}
                             </span>
                         </div>
-                    </div>
+                    </a>
                 ))}
             </div>
         </section>

@@ -70,7 +70,7 @@ function formatDate(value: string) {
 function timeAgo(value: string) {
     const diff = Math.floor((Date.now() - new Date(value).getTime()) / 1000);
     if (diff < 60) return `${diff}d lalu`;
-    if (diff < 3600) return `${Math.floor(diff / 60)} menit lalu`;
+    if (diff < 3600) return `${Math.floor(diff / 60)} menit lalu`; 
     if (diff < 86400) return `${Math.floor(diff / 3600)} jam lalu`;
     return `${Math.floor(diff / 86400)} hari lalu`;
 }

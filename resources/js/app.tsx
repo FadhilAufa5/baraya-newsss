@@ -1,37 +1,48 @@
 import { createInertiaApp } from '@inertiajs/react';
-import { Toaster } from '@/components/ui/sonner';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { initializeTheme } from '@/hooks/use-appearance';
 import AppLayout from '@/layouts/app-layout';
 import AuthLayout from '@/layouts/auth-layout';
 import SettingsLayout from '@/layouts/settings/layout';
+import RootLayout from '@/layouts/root-layout';
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 
 createInertiaApp({
     title: (title) => (title ? `${title} - ${appName}` : appName),
     layout: (name) => {
-        switch (true) {
-            case name === 'welcome' || name.includes('public') || name === 'news/public-show':
-                return null;
-            case name.startsWith('auth/'):
-                return AuthLayout;
-            case name.startsWith('settings/'):
-                return [AppLayout, SettingsLayout];
-            default:
-                return AppLayout;
+        const resolvedLayout = (() => {
+            switch (true) {
+                case name === 'welcome' || name.includes('public') || name === 'news/public-show':
+                    return null;
+                case name.startsWith('auth/'):
+                    return AuthLayout;
+                case name.startsWith('settings/'):
+                    return [AppLayout, SettingsLayout];
+                default:
+                    return AppLayout;
+            }
+        })();
+
+        if (resolvedLayout === null) {
+            return RootLayout;
         }
+
+        if (Array.isArray(resolvedLayout)) {
+            return [RootLayout, ...resolvedLayout];
+        }
+
+        return [RootLayout, resolvedLayout];
     },
     strictMode: true,
     withApp(app) {
         return (
             <TooltipProvider delayDuration={0}>
                 {app}
-                <Toaster />
-
             </TooltipProvider>
         );
     },
+
     progress: {
         color: '#4B5563',
     },

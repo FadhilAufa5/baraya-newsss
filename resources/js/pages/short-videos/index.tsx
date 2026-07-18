@@ -125,7 +125,7 @@ export default function ShortVideoIndex({ shortVideos, filters }: Props) {
                         <h1 className="text-xl font-bold">Short Video</h1>
                         <p className="text-sm text-muted-foreground">Kelola video pendek secara terpisah dari berita.</p>
                     </div>
-                    <Button asChild className="gap-2 bg-red-600 hover:bg-red-700">
+                    <Button asChild className="gap-2 bg-gray-600 hover:bg-gray-700">
                         <Link href="/short-videos/create">
                             <Plus className="size-4" />
                             Upload Video

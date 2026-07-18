@@ -1,11 +1,14 @@
 import React, { useState } from 'react';
 import { Head, router, usePage } from '@inertiajs/react';
-import { VideoHeader } from '@/components/short-videos/video-header';
+import { Header } from '@/components/welcome/header';
 import { VideoCard } from '@/components/short-videos/video-card';
 import { VideoModal } from '@/components/short-videos/video-modal';
 import { TrendingTicker } from '@/components/welcome/trending-ticker';
 import { Footer } from '@/components/welcome/footer';
-import { Video, Search, ChevronRight, X } from 'lucide-react';
+import {
+    Video, Search, ChevronRight, X, TrendingUp,
+    Flame, LayoutGrid,
+} from 'lucide-react';
 
 interface ShortVideo {
     id: number;
@@ -27,7 +30,7 @@ interface PaginatedData {
     total: number;
     links: { url: string | null; label: string; active: boolean }[];
 }
-// 
+
 interface Props {
     videos: PaginatedData;
     filters: { search?: string };
@@ -39,11 +42,26 @@ const TRENDING_ITEMS = [
     'Update Video Terbaru Setiap Hari dari Redaksi',
 ];
 
+const CATEGORIES = [
+    { label: 'Semua Video', value: 'Semua', icon: '🎬' },
+    { label: 'Jawa Barat',  value: 'Jawa Barat',  icon: '🏔️' },
+    { label: 'Nasional',    value: 'Nasional',    icon: '🇮🇩' },
+    { label: 'Olahraga',    value: 'Olahraga',    icon: '⚽' },
+    { label: 'Ekonomi',     value: 'Ekonomi',     icon: '📈' },
+    { label: 'Teknologi',   value: 'Teknologi',   icon: '💻' },
+    { label: 'Lifestyle',   value: 'Lifestyle',   icon: '✨' },
+];
+
+const POPULAR_TAGS = [
+    '#KulinerBandung', '#ExploreJabar', '#PersibDay',
+    '#WisataCiwidey', '#GedungSate', '#ShortsHariIni', '#KabarJabar',
+];
+
 export default function PublicShortVideos({ videos, filters }: Props) {
     const { auth } = usePage<{ auth: { user: unknown } }>().props;
-    const [searchQuery, setSearchQuery] = useState(filters.search ?? '');
+    const [searchQuery, setSearchQuery]   = useState(filters.search ?? '');
     const [activeCategory, setActiveCategory] = useState('Semua');
-    const [activeVideo, setActiveVideo] = useState<ShortVideo | null>(null);
+    const [activeVideo, setActiveVideo]   = useState<ShortVideo | null>(null);
     const [trendingIndex, setTrendingIndex] = useState(0);
 
     const applySearch = () => {
@@ -54,16 +72,14 @@ export default function PublicShortVideos({ videos, filters }: Props) {
     };
 
     const activeIndex = activeVideo ? videos.data.findIndex((v) => v.id === activeVideo.id) : -1;
-    const handlePrev = () => {
-        if (activeIndex > 0) setActiveVideo(videos.data[activeIndex - 1]);
-    };
-    const handleNext = () => {
-        if (activeIndex < videos.data.length - 1) setActiveVideo(videos.data[activeIndex + 1]);
-    };
+    const handlePrev = () => { if (activeIndex > 0) setActiveVideo(videos.data[activeIndex - 1]); };
+    const handleNext = () => { if (activeIndex < videos.data.length - 1) setActiveVideo(videos.data[activeIndex + 1]); };
 
     return (
         <>
-            <Head title="Short Videos — Baraya News" />
+            <Head title="Short Videos — Baraya News">
+                <meta name="description" content="Tonton video pendek berita terkini dari seluruh Indonesia, terutama Jawa Barat." />
+            </Head>
 
             {/* Modal */}
             {activeVideo && (
@@ -77,12 +93,11 @@ export default function PublicShortVideos({ videos, filters }: Props) {
             )}
 
             {/* HEADER */}
-            <VideoHeader
-                searchQuery={searchQuery}
-                setSearchQuery={setSearchQuery}
-                onSearch={applySearch}
+            <Header
                 activeCategory={activeCategory}
                 setActiveCategory={setActiveCategory}
+                searchQuery={searchQuery}
+                setSearchQuery={setSearchQuery}
             />
 
             {/* TRENDING TICKER */}
@@ -92,153 +107,217 @@ export default function PublicShortVideos({ videos, filters }: Props) {
                 setTrendingIndex={setTrendingIndex}
             />
 
-            {/* MAIN CONTENT */}
-            <main className="bg-gray-50 dark:bg-gray-900 min-h-screen">
-                <div className="mx-auto max-w-[1280px] px-4 py-6 sm:px-6 space-y-6">
+            {/* ─── MAIN ────────────────────────────────────────────────── */}
+            <main className="min-h-screen bg-gray-50 dark:bg-[#0a0a0f] transition-colors duration-300">
 
-                    {/* Beautiful Hero Video Banner */}
-                    <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-red-600 via-red-800 to-indigo-950 p-6 sm:p-8 text-white shadow-md">
-                        <div className="absolute top-0 right-0 -mt-4 -mr-4 w-60 h-60 bg-white/5 rounded-full blur-3xl pointer-events-none" />
-                        <div className="relative z-10 max-w-xl space-y-2">
-                            <span className="inline-block rounded-full bg-white/20 px-3 py-1 text-[10px] font-black uppercase tracking-widest">
-                                Baraya Video-Shorts 🎬
-                            </span>
-                            <h2 className="text-2xl sm:text-4xl font-extrabold leading-tight tracking-tight">
-                                Video Berita Terbaru
-                            </h2>
-                            <p className="text-xs sm:text-sm text-red-100 leading-relaxed font-medium">
-                                Berita singkat. Informasi cepat. Tetap terhubung dengan peristiwa terkini.
-                            </p>
+                {/* ─── HERO BANNER ─────────────────────────────────────── */}
+                <div className="relative overflow-hidden bg-white dark:bg-[#0a0a0f]">
+                    {/* Ambient glow — only visible in dark mode */}
+                    <div className="absolute -top-20 -left-20 size-[400px] rounded-full bg-red-700/0 dark:bg-red-700/20 blur-[100px] pointer-events-none transition-all duration-500" />
+                    <div className="absolute -bottom-20 right-0 size-[350px] rounded-full bg-indigo-700/0 dark:bg-indigo-700/15 blur-[120px] pointer-events-none transition-all duration-500" />
+
+                    {/* Light mode subtle gradient stripe */}
+                    <div className="absolute inset-0 bg-gradient-to-br from-red-50/80 via-white to-gray-50 dark:from-transparent dark:via-transparent dark:to-transparent pointer-events-none" />
+
+                    <div className="relative mx-auto max-w-[1280px] px-4 sm:px-6 pt-8 pb-10">
+                        <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-6">
+
+                            {/* Left: heading */}
+                            <div className="space-y-3 max-w-xl">
+                                <div className="inline-flex items-center gap-2 rounded-full bg-red-100 dark:bg-red-600/15 border border-red-200 dark:border-red-600/25 px-3 py-1">
+                                    <span className="size-1.5 rounded-full bg-red-500 animate-pulse" />
+                                    <span className="text-[10px] font-black uppercase tracking-[0.15em] text-red-600 dark:text-red-400">
+                                        Baraya Video-Shorts
+                                    </span>
+                                </div>
+                                <h1 className="text-3xl sm:text-5xl font-black leading-[1.05] tracking-tight text-gray-900 dark:text-white">
+                                    Video Berita
+                                    <span className="block bg-gradient-to-r from-red-500 via-red-500 to-orange-400 bg-clip-text text-transparent">
+                                        Terkini
+                                    </span>
+                                </h1>
+                                <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed max-w-sm">
+                                    Berita singkat. Informasi cepat. Tetap terhubung dengan peristiwa penting di sekitar Anda.
+                                </p>
+                            </div>
+
+                            {/* Right: Stats & Desktop Search */}
+                            <div className="flex flex-col gap-3 sm:items-end">
+                                <div className="flex items-center gap-3">
+                                    {/* Total videos */}
+                                    <div className="rounded-2xl bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/8 px-4 py-2.5 text-center">
+                                        <div className="text-xl font-black text-gray-800 dark:text-white">{videos.total}</div>
+                                        <div className="text-[9px] uppercase tracking-widest text-gray-400 dark:text-gray-400 font-bold">Total Video</div>
+                                    </div>
+                                    {/* Current page */}
+                                    <div className="rounded-2xl bg-red-50 dark:bg-red-600/15 border border-red-200 dark:border-red-600/25 px-4 py-2.5 text-center">
+                                        <div className="text-xl font-black text-red-600 dark:text-red-400">{videos.current_page}</div>
+                                        <div className="text-[9px] uppercase tracking-widest text-red-500/70 dark:text-red-400/70 font-bold">Halaman</div>
+                                    </div>
+                                </div>
+
+                                {/* Desktop search */}
+                                <div className="hidden sm:flex items-center gap-2">
+                                    <div className="relative">
+                                        <input
+                                            type="text"
+                                            value={searchQuery}
+                                            onChange={(e) => setSearchQuery(e.target.value)}
+                                            onKeyDown={(e) => e.key === 'Enter' && applySearch()}
+                                            placeholder="Cari video shorts..."
+                                            className="w-60 rounded-full border border-gray-200 dark:border-white/12 bg-white dark:bg-white/6 backdrop-blur-sm py-2 pl-4 pr-10 text-xs text-gray-800 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:border-red-400 dark:focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-200 dark:focus:ring-red-500/20 shadow-sm dark:shadow-none transition-colors"
+                                        />
+                                        <Search className="absolute right-3.5 top-1/2 size-3.5 -translate-y-1/2 text-gray-400" />
+                                    </div>
+                                    <button
+                                        onClick={applySearch}
+                                        className="rounded-full bg-red-600 hover:bg-red-500 px-4 py-2 text-xs font-bold text-white transition-all shadow-md shadow-red-600/25"
+                                    >
+                                        Cari
+                                    </button>
+                                </div>
+                            </div>
                         </div>
                     </div>
+                </div>
 
-                    <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-                        {/* Left Side Content Navigation (for desktop styling) */}
-                        <div className="hidden lg:flex flex-col gap-6">
-                            {/* Categories Widget */}
-                            <div className="rounded-xl bg-white dark:bg-gray-800 p-4 shadow-sm border border-gray-100 dark:border-gray-700">
-                                <h3 className="text-xs font-black uppercase tracking-wider text-gray-400 mb-3">Topik Video</h3>
-                                <div className="flex flex-col gap-1">
-                                    {['Semua Video', 'Jawa Barat', 'Nasional', 'Olahraga', 'Ekonomi', 'Teknologi', 'Lifestyle'].map((cat, idx) => (
-                                        <button
-                                            key={cat}
-                                            onClick={() => setActiveCategory(cat === 'Semua Video' ? 'Semua' : cat)}
-                                            className={`w-full text-left px-3 py-2 rounded-lg text-xs font-bold transition-all flex items-center justify-between ${
-                                                activeCategory === cat || (cat === 'Semua Video' && activeCategory === 'Semua')
-                                                    ? 'bg-red-50 text-red-600 dark:bg-red-950/40 dark:text-red-400'
-                                                    : 'text-gray-600 hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-gray-700/50'
-                                            }`}
-                                        >
-                                            <span>{cat}</span>
-                                            <span className="text-[10px] opacity-60">
-                                                {idx === 0 ? videos.total : Math.floor((videos.total / (idx + 1)) + 1)}
-                                            </span>
-                                        </button>
-                                    ))}
+                {/* ─── BODY ────────────────────────────────────────────── */}
+                <div className="mx-auto max-w-[1280px] px-4 sm:px-6 pb-16 space-y-5">
+
+                    {/* Mobile Search */}
+                    <div className="flex gap-2 sm:hidden pt-4">
+                        <div className="relative flex-1">
+                            <input
+                                type="text"
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                onKeyDown={(e) => e.key === 'Enter' && applySearch()}
+                                placeholder="Cari video..."
+                                className="w-full rounded-full border border-gray-200 dark:border-white/12 bg-white dark:bg-white/6 py-2 pl-4 pr-9 text-xs text-gray-800 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:border-red-400 focus:outline-none shadow-sm transition-colors"
+                            />
+                            <Search className="absolute right-3 top-1/2 size-3.5 -translate-y-1/2 text-gray-400" />
+                        </div>
+                        <button
+                            onClick={applySearch}
+                            className="rounded-full bg-red-600 px-4 py-2 text-xs font-bold text-white hover:bg-red-500 transition-colors shadow-sm"
+                        >
+                            Cari
+                        </button>
+                    </div>
+
+                    <div className="grid grid-cols-1 lg:grid-cols-[220px_1fr] gap-6">
+
+                        {/* ─── SIDEBAR ─────────────────────────── */}
+                        <aside className="hidden lg:flex flex-col gap-4">
+
+                            {/* Categories */}
+                            <div className="rounded-2xl bg-white dark:bg-white/4 border border-gray-200 dark:border-white/8 p-4 shadow-sm dark:shadow-none">
+                                <h3 className="text-[9px] font-black uppercase tracking-[0.15em] text-gray-400 mb-3 flex items-center gap-1.5">
+                                    <LayoutGrid className="size-3" /> Topik Video
+                                </h3>
+                                <div className="flex flex-col gap-0.5">
+                                    {CATEGORIES.map((cat) => {
+                                        const isActive = activeCategory === cat.value;
+                                        return (
+                                            <button
+                                                key={cat.value}
+                                                onClick={() => setActiveCategory(cat.value)}
+                                                className={`w-full text-left px-3 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 ${
+                                                    isActive
+                                                        ? 'bg-red-50 dark:bg-red-600/20 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-600/30'
+                                                        : 'text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-white/6 hover:text-gray-800 dark:hover:text-gray-200 border border-transparent'
+                                                }`}
+                                            >
+                                                <span>{cat.icon}</span>
+                                                <span>{cat.label}</span>
+                                                {isActive && <span className="ml-auto size-1.5 rounded-full bg-red-500" />}
+                                            </button>
+                                        );
+                                    })}
                                 </div>
                             </div>
 
-                            {/* Popular Tags Widget */}
-                            <div className="rounded-xl bg-white dark:bg-gray-800 p-4 shadow-sm border border-gray-100 dark:border-gray-700">
-                                <h3 className="text-xs font-black uppercase tracking-wider text-gray-400 mb-3">Tag Populer</h3>
+                            {/* Popular Tags */}
+                            <div className="rounded-2xl bg-white dark:bg-white/4 border border-gray-200 dark:border-white/8 p-4 shadow-sm dark:shadow-none">
+                                <h3 className="text-[9px] font-black uppercase tracking-[0.15em] text-gray-400 mb-3 flex items-center gap-1.5">
+                                    <Flame className="size-3 text-orange-400" /> Tag Populer
+                                </h3>
                                 <div className="flex flex-wrap gap-1.5">
-                                    {['#KulinerBandung', '#ExploreJabar', '#PersibDay', '#WisataCiwidey', '#GedungSate', '#ShortsHariIni', '#KabarJabar'].map((tag) => (
-                                        <button key={tag} className="text-[10px] font-bold px-2.5 py-1 rounded-md bg-gray-100 hover:bg-gray-200 dark:bg-gray-750 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300 transition-colors">
+                                    {POPULAR_TAGS.map((tag) => (
+                                        <button
+                                            key={tag}
+                                            className="text-[10px] font-bold px-2.5 py-1 rounded-lg bg-gray-100 dark:bg-white/6 hover:bg-red-50 dark:hover:bg-white/12 text-gray-500 dark:text-gray-400 hover:text-red-600 dark:hover:text-gray-200 border border-gray-200 dark:border-white/6 hover:border-red-200 dark:hover:border-white/15 transition-all"
+                                        >
                                             {tag}
                                         </button>
                                     ))}
                                 </div>
                             </div>
 
-                            {/* Statistics Widget */}
-                            {/* <div className="rounded-xl bg-gradient-to-br from-gray-900 to-slate-950 p-4 text-white shadow-sm border border-gray-850">
-                                <h3 className="text-xs font-black uppercase tracking-wider text-red-400 mb-3">Statistik Shorts</h3>
-                                <div className="grid grid-cols-2 gap-3 text-center">
-                                    <div className="bg-white/5 rounded-lg p-2.5">
-                                        <div className="text-lg font-black text-white">{videos.total}</div>
-                                        <div className="text-[8px] text-gray-400 uppercase font-bold tracking-wide">Total Video</div>
-                                    </div>
-                                    <div className="bg-white/5 rounded-lg p-2.5">
-                                        <div className="text-lg font-black text-white">48.2K</div>
-                                        <div className="text-[8px] text-gray-400 uppercase font-bold tracking-wide">Short Views</div>
-                                    </div>
+                            {/* Tips card */}
+                            <div className="rounded-2xl bg-red-50 dark:bg-gradient-to-br dark:from-red-900/30 dark:to-red-950/20 border border-red-200 dark:border-red-800/25 p-4">
+                                <div className="flex items-center gap-2 mb-2">
+                                    <TrendingUp className="size-3.5 text-red-500 dark:text-red-400" />
+                                    <span className="text-[9px] font-black uppercase tracking-widest text-red-500 dark:text-red-400">Tips</span>
                                 </div>
-                            </div> */}
-                        </div>
+                                <p className="text-[10px] text-gray-500 dark:text-gray-400 leading-relaxed">
+                                    Klik video untuk menontonnya secara penuh. Gunakan tombol panah keyboard untuk navigasi antar video.
+                                </p>
+                            </div>
+                        </aside>
 
-                        {/* Right Side Main Content Grid */}
-                        <div className="lg:col-span-3 space-y-4">
-                            {/* Inner Header strip */}
-                            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between bg-white dark:bg-gray-800 px-4 py-3 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
-                                <div className="flex items-center gap-2">
-                                    <div className="h-4 w-1 rounded bg-red-600" />
+                        {/* ─── MAIN CONTENT ────────────────────── */}
+                        <div className="space-y-4">
+
+                            {/* Toolbar */}
+                            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between rounded-2xl bg-white dark:bg-white/4 border border-gray-200 dark:border-white/8 px-4 py-3 shadow-sm dark:shadow-none">
+                                <div className="flex items-center gap-2.5">
+                                    <div className="h-4 w-0.5 rounded-full bg-red-500" />
                                     <span className="text-xs font-black uppercase tracking-wider text-gray-800 dark:text-white">
-                                        {filters.search ? `Hasil Pencarian "${filters.search}"` : `Semua Video Shorts (${activeCategory})`}
+                                        {filters.search ? `Hasil: "${filters.search}"` : `Semua Video Shorts`}
                                     </span>
-                                    <span className="rounded-full bg-red-600/10 border border-red-600/20 px-2 py-0.5 text-[9px] font-black text-red-600 ml-1">
+                                    <span className="rounded-full bg-red-100 dark:bg-red-600/20 border border-red-200 dark:border-red-600/30 px-2 py-0.5 text-[9px] font-black text-red-600 dark:text-red-400">
                                         {videos.total}
                                     </span>
                                 </div>
-                                <span className="text-xs font-bold text-gray-400 hidden sm:inline">
+                                <span className="text-[10px] font-semibold text-gray-400">
                                     Menampilkan {videos.data.length} dari {videos.total} video
                                 </span>
-
-                                {/* Mobile search wrapper */}
-                                <div className="flex gap-2 md:hidden w-full sm:w-auto">
-                                    <div className="relative flex-1">
-                                        <input
-                                            type="text"
-                                            value={searchQuery}
-                                            onChange={(e) => setSearchQuery(e.target.value)}
-                                            onKeyDown={(e) => e.key === 'Enter' && applySearch()}
-                                            placeholder="Cari video..."
-                                            className="w-full rounded-full border border-gray-300 bg-white py-1.5 pl-4 pr-9 text-xs text-gray-700 focus:border-red-400 focus:outline-none dark:border-gray-600 dark:bg-gray-850 dark:text-gray-100"
-                                        />
-                                        <Search className="absolute right-3 top-1/2 size-3.5 -translate-y-1/2 text-gray-400" />
-                                    </div>
-                                    <button onClick={applySearch} className="rounded-full bg-red-600 px-4 py-1.5 text-xs font-bold text-white hover:bg-red-700 transition-colors">
-                                        Cari
-                                    </button>
-                                </div>
                             </div>
 
                             {/* Active filter badge */}
                             {filters.search && (
                                 <div className="flex items-center gap-2">
-                                    <span className="text-xs text-gray-600 dark:text-gray-400">
-                                        Hasil filter: <strong className="text-gray-800 dark:text-gray-100">"{filters.search}"</strong>
+                                    <span className="text-xs text-gray-500 dark:text-gray-400">
+                                        Filter: <strong className="text-gray-800 dark:text-gray-200">"{filters.search}"</strong>
                                     </span>
                                     <button
-                                        onClick={() => {
-                                            setSearchQuery('');
-                                            router.get('/videos', {});
-                                        }}
-                                        className="rounded-full border border-gray-300 bg-white px-2 py-0.5 text-[9px] font-semibold text-gray-500 hover:border-red-400 hover:text-red-600 transition-colors flex items-center gap-1 dark:border-gray-600 dark:bg-gray-850"
+                                        onClick={() => { setSearchQuery(''); router.get('/videos', {}); }}
+                                        className="rounded-full border border-gray-300 dark:border-white/15 bg-white dark:bg-white/6 px-2.5 py-0.5 text-[9px] font-semibold text-gray-500 dark:text-gray-400 hover:border-red-400 dark:hover:border-red-500/50 hover:text-red-500 dark:hover:text-red-400 transition-colors flex items-center gap-1 shadow-sm dark:shadow-none"
                                     >
                                         <X className="size-2.5" /> Hapus
                                     </button>
                                 </div>
                             )}
 
-                            {/* Cards Area */}
+                            {/* Cards / Empty State */}
                             {videos.data.length === 0 ? (
-                                <div className="flex flex-col items-center justify-center gap-4 rounded-xl border border-dashed border-gray-300 bg-white dark:border-gray-700 dark:bg-gray-800 py-24 text-center shadow-sm">
-                                    <div className="flex size-16 items-center justify-center rounded-xl bg-gray-100 dark:bg-gray-700">
-                                        <Video className="size-8 text-gray-400" />
+                                <div className="flex flex-col items-center justify-center gap-5 rounded-2xl border border-dashed border-gray-300 dark:border-white/10 bg-white dark:bg-white/3 py-28 text-center shadow-sm dark:shadow-none">
+                                    <div className="flex size-20 items-center justify-center rounded-2xl bg-gray-100 dark:bg-white/6 border border-gray-200 dark:border-white/8">
+                                        <Video className="size-9 text-gray-400 dark:text-gray-500" />
                                     </div>
                                     <div>
-                                        <p className="font-semibold text-gray-700 dark:text-gray-200">Belum ada video</p>
-                                        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                                            {filters.search ? 'Tidak ada video yang sesuai dengan pencarian Anda.' : 'Video short akan segera hadir!'}
+                                        <p className="font-bold text-gray-700 dark:text-gray-300 mb-1">Belum ada video</p>
+                                        <p className="text-xs text-gray-400 dark:text-gray-500">
+                                            {filters.search
+                                                ? 'Tidak ada video yang sesuai dengan pencarian.'
+                                                : 'Video short akan segera hadir!'}
                                         </p>
                                     </div>
                                     {filters.search && (
                                         <button
-                                            onClick={() => {
-                                                setSearchQuery('');
-                                                router.get('/videos', {});
-                                            }}
-                                            className="rounded-full border border-dashed border-red-300 px-4 py-2 text-xs font-semibold text-red-600 hover:bg-red-50 transition-colors flex items-center gap-2"
+                                            onClick={() => { setSearchQuery(''); router.get('/videos', {}); }}
+                                            className="rounded-full border border-red-300 dark:border-red-800/50 text-red-500 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-600/15 px-5 py-2 text-xs font-bold transition-all flex items-center gap-2"
                                         >
                                             Lihat Semua Video <ChevronRight className="size-4" />
                                         </button>
@@ -246,14 +325,14 @@ export default function PublicShortVideos({ videos, filters }: Props) {
                                 </div>
                             ) : (
                                 <>
-                                    {/* Video Grid — 9:16 cards */}
+                                    {/* Video Grid — 9:16 aspect ratio */}
                                     <div className="grid gap-4 grid-cols-2 sm:grid-cols-3 xl:grid-cols-4">
                                         {videos.data.map((video) => (
                                             <VideoCard key={video.id} video={video} onSelect={setActiveVideo} />
                                         ))}
                                     </div>
 
-                                    {/* Load more / Pagination */}
+                                    {/* Pagination */}
                                     {videos.last_page > 1 && (
                                         <div className="flex flex-wrap items-center justify-center gap-2 pt-4">
                                             {videos.links.map((link, i) => {
@@ -263,10 +342,10 @@ export default function PublicShortVideos({ videos, filters }: Props) {
                                                     <button
                                                         key={i}
                                                         onClick={() => link.url && router.get(link.url)}
-                                                        className={`min-w-[36px] rounded-lg border px-3 py-1.5 text-xs font-bold transition-colors ${
+                                                        className={`min-w-[36px] rounded-xl border px-3 py-1.5 text-xs font-bold transition-all ${
                                                             link.active
-                                                                ? 'border-red-600 bg-red-600 text-white'
-                                                                : 'border-gray-300 bg-white text-gray-600 hover:border-red-400 hover:text-red-600 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300'
+                                                                ? 'border-red-600 bg-red-600 text-white shadow-md shadow-red-600/25'
+                                                                : 'border-gray-200 dark:border-white/12 bg-white dark:bg-white/5 text-gray-500 dark:text-gray-400 hover:border-red-400 dark:hover:border-red-600/50 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-600/10'
                                                         }`}
                                                         aria-label={`Halaman ${label}`}
                                                     >

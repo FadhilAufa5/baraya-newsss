@@ -1,77 +1,141 @@
 import React, { useState } from 'react';
-import { Head, usePage } from '@inertiajs/react';
+import { Head, router, usePage } from '@inertiajs/react';
 import { Header } from '@/components/welcome/header';
 import { TrendingTicker } from '@/components/welcome/trending-ticker';
 import { AdBanner } from '@/components/welcome/ad-banner';
 import { HeroSection } from '@/components/welcome/hero-section';
 import { NewsSections } from '@/components/welcome/news-sections';
 import { Footer } from '@/components/welcome/footer';
+import { GradientPlaceholder } from '@/components/welcome/gradient-placeholder';
 
-// ─── Static demo data ──────────────────────────────────────────────────────────
+// ─── Types ────────────────────────────────────────────────────────────────────
 
-const HERO_ARTICLE = {
-    id: 1,
-    category: 'Jawa Barat',
-    title: 'Ridwan Kamil Resmikan Gedung Inovasi Digital Jawa Barat',
-    excerpt: 'Gubernur Jawa Barat meresmikan gedung pusat inovasi digital terbesar di Asia Tenggara yang akan menjadi motor penggerak transformasi digital di wilayah Jawa Barat.',
-    author: 'Redaksi Baraya News',
-    published_at: '28 Mei 2024 • 12:45 WIB',
-    views: 24800,
-    reading_time: 4,
-    image: null,
-    slug: 'ridwan-kamil-resmikan-gedung-inovasi-digital',
-};
+interface Article {
+    id: number;
+    category: string;
+    title: string;
+    slug: string;
+    excerpt?: string | null;
+    author?: string | null;
+    published_at: string | null;
+    views?: number;
+    reading_time?: number;
+    image?: string | null;
+    is_featured?: boolean;
+}
 
-const SIDE_ARTICLES = [
-    { id: 2, category: 'Nasional', title: 'Jokowi Resmikan Jalan Tol Getaci Diketuk, Target Selesai 2025', published_at: '28 Mei 2024', image: null },
-    { id: 3, category: 'Ekonomi', title: 'Inflasi Mei 2024 Terkendali di Angka 2.8 Persen', published_at: '28 Mei 2024', image: null },
-    { id: 4, category: 'Olahraga', title: 'Persib Bandung Menang Tipis Atas Arena FC di Stadion GBLA', published_at: '28 Mei 2024', image: null },
-    { id: 5, category: 'Teknologi', title: 'Teknologi AI Terbaru yang Wajib Diketahui 2024', published_at: '28 Mei 2024', image: null },
-];
+interface ShortVideoItem {
+    id: number;
+    title: string;
+    thumbnail: string | null;
+    published_at: string | null;
+    views: number;
+}
 
-const VIDEO_STORIES = [
-    { id: 1, title: 'Ridwan Kamil Tinjau Lokasi Masjid Al Jabbar', duration: '0:45', time_ago: '1 jam yang lalu' },
-    { id: 2, title: 'Suasana Car Free Day Dago Bandung', duration: '1:02', time_ago: '3 jam yang lalu' },
-    { id: 3, title: 'Progres Tol Padaleunyi - Cisuny', duration: '0:56', time_ago: '5 jam yang lalu' },
-    { id: 4, title: 'Persib Latihan Jelang Lawan Bali United', duration: '0:38', time_ago: '7 jam yang lalu' },
-];
+interface Props {
+    heroArticle:      Article | null;
+    sideArticles:     Article[];
+    beritaTerbaru:    Article[];
+    pilihanRedaksi:   Article | null;
+    beritaTerpopuler: { id: number; title: string; slug: string; published_at: string | null; views: number }[];
+    trendingItems:    string[];
+    shortVideos:      ShortVideoItem[];
+    filteredArticles: Article[];
+    filters:          { search?: string; category?: string };
+}
 
-const BERITA_TERBARU = [
-    { id: 1, category: 'Nasional', title: 'KCIC Catat 18 Ribu Penumpang Whoosh pada Libur Panjang Waisak 2024', excerpt: 'PT KCIC mencatatkan peningkatan jumlah penumpang sebesar 30% selama masa libur panjang Waisak 2024.', published_at: '28 Mei 2024 • 11:20 WIB', image: null },
-    { id: 2, category: 'Ekonomi', title: 'Rupiah Menguat terhadap Dolar AS, Sentuh Rp15.900', excerpt: 'Nilai tukar rupiah menguat terhadap dolar AS seiring sentimen pasar modal dalam negeri yang membaik.', published_at: '28 Mei 2024 • 10:45 WIB', image: null },
-    { id: 3, category: 'Jawa Barat', title: 'Pemkot Bandung Luncurkan Program Beasiswa 1000 Mahasiswa', excerpt: 'Pemerintah Kota Bandung akan memberikan beasiswa penuh kepada 1000 mahasiswa berprestasi dari keluarga kurang mampu.', published_at: '28 Mei 2024 • 09:15 WIB', image: null },
-];
+// ─── Helpers ──────────────────────────────────────────────────────────────────
 
-const PILIHAN_REDAKSI = {
-    id: 10,
-    category: 'Wisata',
-    title: 'Pesona Kawah Putih Ciwidey yang Selalu Memikat Wisatawan',
-    excerpt: 'Kawah Putih di Ciwidey Bandung terus menjadi destinasi wisata favorit dengan pemandangan danau berwarna putih kehijauan yang memukau.',
-    author: 'Tim Redaksi',
-    published_at: '28 Mei 2024 • 08:15 WIB',
-    image: null,
-    slug: 'pesona-kawah-putih-ciwidey',
-};
+function formatDate(dateStr: string | null): string {
+    if (!dateStr) return '';
+    const d = new Date(dateStr);
+    return d.toLocaleDateString('id-ID', {
+        day: '2-digit', month: 'long', year: 'numeric',
+    }) + ' • ' + d.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) + ' WIB';
+}
 
-const BERITA_TERPOPULER = [
-    { id: 1, title: 'Ridwan Kamil Resmikan Gedung Inovasi Digital Jawa Barat', published_at: '28 Mei 2024' },
-    { id: 2, title: 'Jalan Tol Getaci Diketuk, Target Selesai 2025', published_at: '28 Mei 2024' },
-    { id: 3, title: 'Persib Bandung Menang Tipis Atas Arena FC di Stadion GBLA', published_at: '28 Mei 2024' },
-    { id: 4, title: 'Harga Cabai di Jawa Barat Kembali Naik', published_at: '28 Mei 2024' },
-    { id: 5, title: 'Kota Bogor Raih Penghargaan Kota Terbersih', published_at: '28 Mei 2024' },
-];
+function imageUrl(path: string | null | undefined): string | null {
+    if (!path) return null;
+    if (path.startsWith('http')) return path;
+    return `/storage/${path}`;
+}
 
-const TRENDING_ITEMS = [
-    'Ridwan Kamil Resmikan Gedung Inovasi Digital Jawa Barat',
-    'Persib Bandung Menang Tipis Atas Arena FC di Stadion GBLA',
-    'Inflasi Mei 2024 Terkendali di Angka 2.8 Persen',
-];
+// ─── Component ────────────────────────────────────────────────────────────────
 
-export default function Welcome() {
+export default function Welcome({
+    heroArticle,
+    sideArticles,
+    beritaTerbaru,
+    pilihanRedaksi,
+    beritaTerpopuler,
+    trendingItems,
+    shortVideos,
+    filteredArticles,
+    filters,
+}: Props) {
     const { auth } = usePage<{ auth: { user: unknown } }>().props;
-    const [activeCategory, setActiveCategory] = useState('Home');
-    const [searchQuery, setSearchQuery] = useState('');
-    const [trendingIndex, setTrendingIndex] = useState(0);
+
+    const [activeCategory, setActiveCategory] = useState(filters.category ?? 'Home');
+    const [searchQuery, setSearchQuery]       = useState(filters.search ?? '');
+    const [trendingIndex, setTrendingIndex]   = useState(0);
+
+    // ── Navigation helpers ──────────────────────────────────────────────────
+    const navigate = (cat: string, search: string) => {
+        const params: Record<string, string> = {};
+        if (search.trim()) params.search = search.trim();
+        if (cat && cat !== 'Home' && cat !== 'Indeks') params.category = cat;
+        router.get('/', params, { preserveState: true, replace: true });
+    };
+
+    const handleCategoryChange = (cat: string) => {
+        setActiveCategory(cat);
+        navigate(cat, searchQuery);
+    };
+
+    const handleSearchChange = (q: string) => {
+        setSearchQuery(q);
+    };
+
+    // Trigger search on Enter key — header calls this automatically via input onChange
+    // We watch the input via router.get on "Enter" through the Header component's button
+    // For simplicity, we re-navigate whenever search state is committed (debounce via Enter):
+    const handleSearchSubmit = () => {
+        navigate(activeCategory, searchQuery);
+    };
+
+    // ── Derived state ───────────────────────────────────────────────────────
+    const isDefaultView    = (!filters.search && (!filters.category || filters.category === 'Home'));
+    const isVideoStoryView = filters.category === 'Video Story';
+
+    // Normalise article shapes for child components ─────────────────────────
+    const normalise = (art: Article) => ({
+        ...art,
+        published_at: formatDate(art.published_at),
+        image: imageUrl(art.image),
+    });
+
+    const heroNorm          = heroArticle ? normalise(heroArticle) : null;
+    const sideNorm          = sideArticles.map(normalise);
+    const terbaru           = beritaTerbaru.map(normalise);
+    const pilihanNorm       = pilihanRedaksi ? normalise(pilihanRedaksi) : null;
+    const terpopuler        = beritaTerpopuler.map((a) => ({
+        ...a,
+        published_at: formatDate(a.published_at),
+    }));
+    const filteredNorm      = filteredArticles.map(normalise);
+
+    // Video Story items for NewsSections ────────────────────────────────────
+    const videoStoryItems = shortVideos.map((v) => ({
+        id: v.id,
+        title: v.title,
+        duration: '—',
+        time_ago: formatDate(v.published_at),
+    }));
+
+    // Fallback trending items if no real data yet ───────────────────────────
+    const trendingFinal = trendingItems.length > 0
+        ? trendingItems
+        : ['Baraya News — Portal Berita Terkini Jawa Barat'];
 
     return (
         <>
@@ -80,14 +144,15 @@ export default function Welcome() {
             {/* TOP HEADER */}
             <Header
                 activeCategory={activeCategory}
-                setActiveCategory={setActiveCategory}
+                setActiveCategory={handleCategoryChange}
                 searchQuery={searchQuery}
-                setSearchQuery={setSearchQuery}
+                setSearchQuery={handleSearchChange}
+                onSearchSubmit={handleSearchSubmit}
             />
 
             {/* TRENDING TICKER */}
             <TrendingTicker
-                trendingItems={TRENDING_ITEMS}
+                trendingItems={trendingFinal}
                 trendingIndex={trendingIndex}
                 setTrendingIndex={setTrendingIndex}
             />
@@ -106,29 +171,200 @@ export default function Welcome() {
                         ctaUrl="https://kawahputihciwidey.com"
                     />
 
-                    {/* HERO SECTION */}
-                    <HeroSection
-                        heroArticle={HERO_ARTICLE}
-                        sideArticles={SIDE_ARTICLES}
-                    />
+                    {isDefaultView && heroNorm ? (
+                        <>
+                            {/* HERO SECTION */}
+                            <HeroSection
+                                heroArticle={heroNorm}
+                                sideArticles={sideNorm}
+                            />
 
-                    {/* In-feed Ad */}
-                    <AdBanner
-                        type="in-feed"
-                        sponsorName="Persib Store Official"
-                        title="Jersey Persib Bandung 2026 Edisi Spesial Juara Liga!"
-                        description="Dapatkan jersey resmi terbaru Persib Bandung dengan diskon 15% khusus pembaca Baraya News. Gunakan kode: PERS18JABAR."
-                        ctaText="Miliki Sekarang"
-                        ctaUrl="https://persibstore.id"
-                    />
+                            {/* In-feed Ad */}
+                            <AdBanner
+                                type="in-feed"
+                                sponsorName="Persib Store Official"
+                                title="Jersey Persib Bandung 2026 Edisi Spesial Juara Liga!"
+                                description="Dapatkan jersey resmi terbaru Persib Bandung dengan diskon 15% khusus pembaca Baraya News. Gunakan kode: PERS18JABAR."
+                                ctaText="Miliki Sekarang"
+                                ctaUrl="https://persibstore.id"
+                            />
 
-                    {/* ROW 2: Berita Terbaru | Pilihan Redaksi | Populer */}
-                    <NewsSections
-                        beritaTerbaru={BERITA_TERBARU}
-                        pilihanRedaksi={PILIHAN_REDAKSI}
-                        videoStories={VIDEO_STORIES}
-                        beritaTerpopuler={BERITA_TERPOPULER}
-                    />
+                            {/* ROW 2: Berita Terbaru | Pilihan Redaksi | Populer */}
+                            <NewsSections
+                                beritaTerbaru={terbaru}
+                                pilihanRedaksi={pilihanNorm ?? (terbaru[0] ?? heroNorm)}
+                                videoStories={videoStoryItems}
+                                beritaTerpopuler={terpopuler}
+                            />
+                        </>
+                    ) : isDefaultView && !heroNorm ? (
+                        /* Empty state — no published articles yet */
+                        <div className="flex flex-col items-center justify-center py-32 text-center space-y-4">
+                            <div className="p-5 bg-gray-100 dark:bg-gray-800 rounded-full">
+                                <span className="text-4xl">📰</span>
+                            </div>
+                            <div className="space-y-1">
+                                <h2 className="text-lg font-bold text-gray-800 dark:text-gray-200">
+                                    Belum ada berita yang dipublikasikan
+                                </h2>
+                                <p className="text-sm text-gray-500 dark:text-gray-400">
+                                    Berita akan tampil di sini setelah dipublikasikan dari dashboard.
+                                </p>
+                            </div>
+                        </div>
+                    ) : isVideoStoryView ? (
+                        /* VIDEO STORY GRID VIEW */
+                        <div className="space-y-6">
+                            <div className="flex items-baseline justify-between border-b border-gray-200 dark:border-gray-800 pb-3">
+                                <h2 className="text-xl font-extrabold text-gray-900 dark:text-white tracking-tight flex items-center gap-2">
+                                    <span className="flex size-6 items-center justify-center rounded-full bg-red-600 text-white text-xs">▶</span>
+                                    Video Story
+                                </h2>
+                                <span className="text-xs text-gray-500 font-medium">
+                                    {shortVideos.length} Video tersedia
+                                </span>
+                            </div>
+
+                            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
+                                {shortVideos.map((vid) => (
+                                    <div key={vid.id} className="group bg-white dark:bg-gray-950 rounded-xl overflow-hidden border border-gray-200 dark:border-gray-850 shadow-sm hover:shadow-md transition-all duration-300 flex flex-col h-full">
+                                        <div className="relative aspect-video bg-gradient-to-br from-red-600 to-black flex items-center justify-center overflow-hidden shrink-0">
+                                            {vid.thumbnail ? (
+                                                <img
+                                                    src={imageUrl(vid.thumbnail)!}
+                                                    alt={vid.title}
+                                                    className="absolute inset-0 w-full h-full object-cover"
+                                                />
+                                            ) : null}
+                                            <div className="absolute inset-0 bg-black/40 group-hover:bg-black/20 transition-colors duration-300" />
+                                            <div className="relative z-10 flex size-12 items-center justify-center rounded-full bg-white/95 text-red-600 shadow-lg group-hover:scale-110 transition-transform duration-300">
+                                                <span className="text-lg translate-x-[1px]">▶</span>
+                                            </div>
+                                        </div>
+                                        <div className="p-4 flex-1 flex flex-col justify-between space-y-3">
+                                            <h3 className="text-xs font-bold text-gray-900 dark:text-white line-clamp-2 group-hover:text-red-600 dark:group-hover:text-red-500 transition-colors leading-snug">
+                                                <a href={`/videos`}>{vid.title}</a>
+                                            </h3>
+                                            <span className="text-[10px] text-gray-400 dark:text-gray-500 font-medium">
+                                                {formatDate(vid.published_at)}
+                                            </span>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    ) : (
+                        /* FILTERED ARTICLES LISTING */
+                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                            {/* Main list */}
+                            <div className="lg:col-span-2 space-y-6">
+                                <div className="flex items-baseline justify-between border-b border-gray-200 dark:border-gray-800 pb-3">
+                                    <h2 className="text-xl font-extrabold text-gray-900 dark:text-white tracking-tight">
+                                        {filters.search?.trim()
+                                            ? `Hasil Pencarian: "${filters.search}"`
+                                            : `Kategori: ${activeCategory}`}
+                                    </h2>
+                                    <span className="text-xs text-gray-500 font-medium">
+                                        {filteredNorm.length} Berita ditemukan
+                                    </span>
+                                </div>
+
+                                {filteredNorm.length > 0 ? (
+                                    <div className="space-y-6">
+                                        {filteredNorm.map((article) => (
+                                            <article
+                                                key={article.id}
+                                                className="group flex flex-col sm:flex-row gap-4 sm:gap-5 bg-white dark:bg-gray-950 p-4 rounded-xl border border-gray-200 dark:border-gray-850 shadow-sm hover:shadow-md transition-all duration-300"
+                                            >
+                                                <div className="relative w-full sm:w-48 h-40 sm:h-32 shrink-0 rounded-lg overflow-hidden border border-gray-100 dark:border-gray-800">
+                                                    {article.image ? (
+                                                        <img
+                                                            src={article.image}
+                                                            alt={article.title}
+                                                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                                                        />
+                                                    ) : (
+                                                        <GradientPlaceholder
+                                                            category={article.category}
+                                                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                                                        />
+                                                    )}
+                                                    <div className="absolute top-2 left-2 bg-red-600 text-white text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded shadow-sm z-10">
+                                                        {article.category}
+                                                    </div>
+                                                </div>
+
+                                                <div className="flex-1 flex flex-col justify-between space-y-3 sm:space-y-2">
+                                                    <div className="space-y-1.5">
+                                                        <h3 className="text-sm font-bold text-gray-900 dark:text-white group-hover:text-red-600 dark:group-hover:text-red-500 transition-colors duration-200 leading-snug line-clamp-2">
+                                                            <a href={`/news/${article.id}`}>{article.title}</a>
+                                                        </h3>
+                                                        <p className="text-xs text-gray-500 dark:text-gray-400 line-clamp-2 leading-relaxed">
+                                                            {article.excerpt}
+                                                        </p>
+                                                    </div>
+
+                                                    <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1 text-[10px] text-gray-400 dark:text-gray-500 font-semibold pt-1 border-t border-gray-50 dark:border-gray-900 sm:border-0">
+                                                        <span>{article.author}</span>
+                                                        <span>•</span>
+                                                        <span>{article.published_at}</span>
+                                                        {article.views !== undefined && (
+                                                            <>
+                                                                <span>•</span>
+                                                                <span>{article.views.toLocaleString('id-ID')} views</span>
+                                                            </>
+                                                        )}
+                                                        {article.reading_time !== undefined && (
+                                                            <>
+                                                                <span>•</span>
+                                                                <span>{article.reading_time} mnt baca</span>
+                                                            </>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            </article>
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <div className="flex flex-col items-center justify-center py-16 text-center space-y-4 bg-white dark:bg-gray-950 rounded-xl border border-gray-200 dark:border-gray-850 p-8 shadow-sm">
+                                        <div className="p-4 bg-gray-50 dark:bg-gray-900 rounded-full border border-gray-100 dark:border-gray-800">
+                                            <span className="text-3xl">📁</span>
+                                        </div>
+                                        <div className="space-y-1">
+                                            <h3 className="text-md font-bold text-gray-800 dark:text-gray-200">Belum ada berita</h3>
+                                            <p className="text-xs text-gray-500 dark:text-gray-400 max-w-sm">
+                                                Maaf, belum ada artikel yang dipublikasikan di kategori ini saat ini.
+                                            </p>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Sidebar */}
+                            <div className="space-y-6">
+                                <div className="bg-white dark:bg-gray-950 p-5 rounded-xl border border-gray-200 dark:border-gray-850 shadow-sm space-y-4">
+                                    <h3 className="text-xs font-black uppercase tracking-wider text-gray-900 dark:text-white border-b border-gray-100 dark:border-gray-800 pb-2">
+                                        Terpopuler
+                                    </h3>
+                                    <ul className="divide-y divide-gray-100 dark:divide-gray-800 space-y-3">
+                                        {terpopuler.map((item, idx) => (
+                                            <li key={item.id} className="group flex gap-3 pt-3 first:pt-0">
+                                                <span className="text-2xl font-black text-gray-200 dark:text-gray-800 group-hover:text-red-500/50 transition-colors shrink-0 leading-none">
+                                                    {String(idx + 1).padStart(2, '0')}
+                                                </span>
+                                                <div className="space-y-1">
+                                                    <h4 className="text-xs font-bold text-gray-800 dark:text-gray-200 group-hover:text-red-600 dark:group-hover:text-red-500 transition-colors line-clamp-2 leading-snug">
+                                                        <a href={`/news/${item.id}`}>{item.title}</a>
+                                                    </h4>
+                                                    <span className="text-[10px] text-gray-400 dark:text-gray-500">{item.published_at}</span>
+                                                </div>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    )}
                 </div>
             </main>
 

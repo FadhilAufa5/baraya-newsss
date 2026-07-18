@@ -96,14 +96,45 @@ class NewsController extends Controller
 
     public function show(News $news)
     {
+        // Only show published articles to the public (non-authenticated)
+        if (! auth()->check() && $news->status !== 'published') {
+            abort(404);
+        }
+
         // Increment views
         $news->increment('views');
 
-        return Inertia::render('news/show', [
-            'article' => $news->load(['user', 'comments.user']),
-            'categories' => self::CATEGORIES,
+        // Related articles (same category, latest, excluding current)
+        $related = News::published()
+            ->where('category', $news->category)
+            ->where('id', '!=', $news->id)
+            ->latest('published_at')
+            ->limit(4)
+            ->get(['id', 'title', 'slug', 'category', 'image', 'published_at', 'excerpt', 'views']);
+
+        // Other latest articles (excluding current and related articles)
+        $relatedIds = $related->pluck('id')->push($news->id)->all();
+        $others = News::published()
+            ->whereNotIn('id', $relatedIds)
+            ->latest('published_at')
+            ->limit(5)
+            ->get(['id', 'title', 'slug', 'category', 'image', 'published_at', 'excerpt', 'views']);
+
+        $sharedData = [
+            'article'  => $news->load(['user', 'comments.user']),
+            'related'  => $related,
+            'others'   => $others,
             'canManageComments' => auth()->user()?->can('delete news') ?? false,
-        ]);
+        ];
+
+        // Public visitors get the welcome-layout page, authenticated users get the admin page
+        if (! auth()->check()) {
+            return Inertia::render('news/public-show', $sharedData);
+        }
+
+        return Inertia::render('news/show', array_merge($sharedData, [
+            'categories' => self::CATEGORIES,
+        ]));
     }
 
     public function edit(News $news)

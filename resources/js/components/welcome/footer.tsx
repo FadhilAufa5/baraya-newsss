@@ -39,7 +39,7 @@ export function Footer({ user }: FooterProps) {
                         </ul>
                     </div>
                     {/* CTA */}
-                    <div>
+                    {/* <div>
                         <h4 className="text-xs font-bold uppercase tracking-widest text-gray-300 mb-3">Bergabung</h4>
                         <p className="text-xs text-gray-400 mb-4">Jadilah bagian dari komunitas Baraya News.</p>
                         {user ? (
@@ -56,10 +56,10 @@ export function Footer({ user }: FooterProps) {
                                 </Link>
                             </div>
                         )}
-                    </div>
+                    </div> */}
                 </div>
                 <div className="mt-8 border-t border-gray-700 pt-6 flex flex-col sm:flex-row items-center justify-between gap-3">
-                    <p className="text-[10px] text-gray-500">© 2024 Baraya News. All rights reserved.</p>
+                    <p className="text-[10px] text-gray-500">© 2026 Baraya News. All rights reserved.</p>
                     <p className="text-[10px] text-gray-500">Portal Berita Terkini Jawa Barat</p>
                 </div>
             </div>
