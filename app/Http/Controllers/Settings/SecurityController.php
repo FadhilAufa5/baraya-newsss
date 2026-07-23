@@ -24,7 +24,7 @@ class SecurityController extends Controller
             'passkeys' => Features::canManagePasskeys()
                 ? $request->user()
                     ->passkeys()
-                    ->select(['id', 'name', 'credential', 'created_at', 'last_used_at'])
+                    ->select(['id', 'name', 'authenticator', 'created_at', 'last_used_at'])
                     ->latest()
                     ->get()
                     ->map(fn ($passkey) => [

@@ -69,7 +69,7 @@ function formatDate(value: string) {
 
 function timeAgo(value: string) {
     const diff = Math.floor((Date.now() - new Date(value).getTime()) / 1000);
-    if (diff < 60) return `${diff}d lalu`;
+    if (diff < 60) return `${diff} detik lalu`;
     if (diff < 3600) return `${Math.floor(diff / 60)} menit lalu`; 
     if (diff < 86400) return `${Math.floor(diff / 3600)} jam lalu`;
     return `${Math.floor(diff / 86400)} hari lalu`;
@@ -82,6 +82,7 @@ function truncate(text: string, max = 140) {
 function getInitials(name: string) {
     return name
         .split(' ')
+        .filter(Boolean)
         .slice(0, 2)
         .map((w) => w[0])
         .join('')
@@ -537,17 +538,21 @@ export default function CommentsIndex({ comments, filters, stats }: Props) {
                             komentar
                         </p>
                         <div className="flex items-center gap-1">
-                            {comments.links.map((link, i) => (
-                                <Button
-                                    key={i}
-                                    variant={link.active ? 'default' : 'outline'}
-                                    size="sm"
-                                    disabled={!link.url}
-                                    onClick={() => link.url && router.get(link.url)}
-                                    className="min-w-9 rounded-lg px-2 text-xs"
-                                    dangerouslySetInnerHTML={{ __html: link.label }}
-                                />
-                            ))}
+                            {comments.links.map((link, i) => {
+                                const label = link.label.replace('&laquo;', '‹').replace('&raquo;', '›');
+                                return (
+                                    <Button
+                                        key={i}
+                                        variant={link.active ? 'default' : 'outline'}
+                                        size="sm"
+                                        disabled={!link.url}
+                                        onClick={() => link.url && router.get(link.url)}
+                                        className="min-w-9 rounded-lg px-2 text-xs"
+                                    >
+                                        {label}
+                                    </Button>
+                                );
+                            })}
                         </div>
                     </div>
                 )}

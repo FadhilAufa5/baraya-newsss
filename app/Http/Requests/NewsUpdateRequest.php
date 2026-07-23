@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class NewsUpdateRequest extends FormRequest
 {
@@ -17,7 +18,7 @@ class NewsUpdateRequest extends FormRequest
 
         return [
             'title' => ['required', 'string', 'max:255'],
-            'slug' => ['nullable', 'string', 'max:255', "unique:news,slug,{$newsId}"],
+            'slug' => ['nullable', 'string', 'max:255', Rule::unique('news', 'slug')->ignore($newsId)],
             'category' => ['required', 'string', 'max:100'],
             'author' => ['nullable', 'string', 'max:150'],
             'excerpt' => ['nullable', 'string', 'max:500'],

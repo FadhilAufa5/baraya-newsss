@@ -75,7 +75,16 @@ class CommentController extends Controller
             'ids.*' => ['integer', 'exists:comments,id'],
         ]);
 
-        Comment::whereIn('id', $request->ids)->delete();
+        $comments = Comment::whereIn('id', $request->ids)->get();
+
+        abort_unless(
+            $comments->every(fn ($c) =>
+                $c->user_id === auth()->id() || auth()->user()?->can('delete news')
+            ),
+            403
+        );
+
+        $comments->each->delete();
 
         Inertia::flash('toast', [
             'type'    => 'success',

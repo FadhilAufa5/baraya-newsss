@@ -243,7 +243,7 @@ export default function Welcome({
                                         </div>
                                         <div className="p-4 flex-1 flex flex-col justify-between space-y-3">
                                             <h3 className="text-xs font-bold text-gray-900 dark:text-white line-clamp-2 group-hover:text-red-600 dark:group-hover:text-red-500 transition-colors leading-snug">
-                                                <a href={`/videos`}>{vid.title}</a>
+                                                <a href={`/videos/${vid.id}`}>{vid.title}</a>
                                             </h3>
                                             <span className="text-[10px] text-gray-400 dark:text-gray-500 font-medium">
                                                 {formatDate(vid.published_at)}

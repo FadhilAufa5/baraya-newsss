@@ -313,21 +313,25 @@ export default function PublicProfile({ profileUser, articles }: Props) {
                         {/* Pagination */}
                         {articles.last_page > 1 && (
                             <div className="mt-8 flex items-center justify-center gap-2">
-                                {articles.links.map((link, idx) => (
-                                    <button
-                                        key={idx}
-                                        onClick={() => link.url && router.visit(link.url)}
-                                        disabled={!link.url}
-                                        className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors ${
-                                            link.active
-                                                ? 'bg-red-600 text-white'
-                                                : link.url
-                                                    ? 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
-                                                    : 'bg-gray-50 dark:bg-gray-900 text-gray-300 dark:text-gray-600 cursor-not-allowed'
-                                        }`}
-                                        dangerouslySetInnerHTML={{ __html: link.label }}
-                                    />
-                                ))}
+                                {articles.links.map((link, idx) => {
+                                    const label = link.label.replace('&laquo;', '‹').replace('&raquo;', '›');
+                                    return (
+                                        <button
+                                            key={idx}
+                                            onClick={() => link.url && router.visit(link.url)}
+                                            disabled={!link.url}
+                                            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors ${
+                                                link.active
+                                                    ? 'bg-red-600 text-white'
+                                                    : link.url
+                                                        ? 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
+                                                        : 'bg-gray-50 dark:bg-gray-900 text-gray-300 dark:text-gray-600 cursor-not-allowed'
+                                            }`}
+                                        >
+                                            {label}
+                                        </button>
+                                    );
+                                })}
                             </div>
                         )}
                     </div>

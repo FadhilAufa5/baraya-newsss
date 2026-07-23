@@ -120,21 +120,12 @@ class NewsController extends Controller
             ->limit(5)
             ->get(['id', 'title', 'slug', 'category', 'image', 'published_at', 'excerpt', 'views']);
 
-        $sharedData = [
+        return Inertia::render('news/public-show', [
             'article'  => $news->load(['user', 'comments.user']),
             'related'  => $related,
             'others'   => $others,
             'canManageComments' => auth()->user()?->can('delete news') ?? false,
-        ];
-
-        // Public visitors get the welcome-layout page, authenticated users get the admin page
-        if (! auth()->check()) {
-            return Inertia::render('news/public-show', $sharedData);
-        }
-
-        return Inertia::render('news/show', array_merge($sharedData, [
-            'categories' => self::CATEGORIES,
-        ]));
+        ]);
     }
 
     public function edit(News $news)

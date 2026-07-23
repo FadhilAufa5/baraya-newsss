@@ -18,7 +18,7 @@ class DashboardController extends Controller
 
         // Total News (Articles)
         $totalNews = News::count();
-        $newsLast7Days = News::where('created_at', '>=', now()->subDays(7))->count();
+        $newsLast7Days = News::where('created_at', '>', now()->subDays(7))->count();
         $newsPrev7Days = News::whereBetween('created_at', [now()->subDays(14), now()->subDays(7)])->count();
         $newsChange = 0.0;
         if ($newsPrev7Days > 0) {
@@ -33,7 +33,7 @@ class DashboardController extends Controller
         $pageviews = (int) ($newsViews + $videoViews);
 
         // Pageviews Change (using news views from last 7 days vs previous 7 days as proxy)
-        $viewsLast7Days = News::where('created_at', '>=', now()->subDays(7))->sum('views');
+        $viewsLast7Days = News::where('created_at', '>', now()->subDays(7))->sum('views');
         $viewsPrev7Days = News::whereBetween('created_at', [now()->subDays(14), now()->subDays(7)])->sum('views');
         $viewsChange = 0.0;
         if ($viewsPrev7Days > 0) {
@@ -48,7 +48,7 @@ class DashboardController extends Controller
 
         // Total Comments
         $totalComments = Comment::count();
-        $commentsLast7Days = Comment::where('created_at', '>=', now()->subDays(7))->count();
+        $commentsLast7Days = Comment::where('created_at', '>', now()->subDays(7))->count();
         $commentsPrev7Days = Comment::whereBetween('created_at', [now()->subDays(14), now()->subDays(7)])->count();
         $commentsChange = 0.0;
         if ($commentsPrev7Days > 0) {

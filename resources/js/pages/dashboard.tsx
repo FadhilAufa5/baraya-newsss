@@ -547,7 +547,7 @@ export default function Dashboard({
                             <div className="rounded-lg border border-dashed bg-muted/40 p-3 text-center">
                                 <Globe className="mx-auto mb-1 size-5 text-muted-foreground" />
                                 <p className="text-xs text-muted-foreground">
-                                    <span className="font-semibold text-foreground">97.2K</span> pengunjung unik bulan ini
+                                    Data traffic perangkat
                                 </p>
                             </div>
                         </CardContent>
