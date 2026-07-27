@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\Ad;
 use App\Models\News;
 use App\Models\ShortVideo;
 use Illuminate\Support\Collection;
@@ -90,6 +91,11 @@ class NewsFeedService
             ? (clone $base)->latest('published_at')->limit(20)->get()
             : collect();
 
+        // ── Active Ads ────────────────────────────────────────────────────
+        $ads = Ad::active()
+            ->orderBy('sort_order')
+            ->get();
+
         return compact(
             'heroArticle',
             'sideArticles',
@@ -99,6 +105,7 @@ class NewsFeedService
             'trendingItems',
             'shortVideos',
             'filteredArticles',
+            'ads',
         );
     }
 

@@ -30,25 +30,36 @@ class NewsService
 
     /**
      * Update an existing article.
-     * Replaces old files when new uploads are provided.
+     * Replaces old files when new uploads are provided,
+     * or removes them when remove flags are set.
      */
     public function update(News $news, array $data, ?UploadedFile $image = null, ?UploadedFile $video = null): News
     {
         $data = $this->prepareData($data, $news);
 
+        // Handle image: upload new, remove, or keep existing
         if ($image) {
-            if ($news->image) {
-                Storage::disk('public')->delete($news->image);
-            }
+            $this->deleteFile($news->image);
             $data['image'] = $image->store('news', 'public');
+        } elseif (!empty($data['remove_image'])) {
+            $this->deleteFile($news->image);
+            $data['image'] = null;
+        } else {
+            unset($data['image']);
         }
 
+        // Handle short video: upload new, remove, or keep existing
         if ($video) {
-            if ($news->short_video) {
-                Storage::disk('public')->delete($news->short_video);
-            }
+            $this->deleteFile($news->short_video);
             $data['short_video'] = $video->store('news/videos', 'public');
+        } elseif (!empty($data['remove_short_video'])) {
+            $this->deleteFile($news->short_video);
+            $data['short_video'] = null;
+        } else {
+            unset($data['short_video']);
         }
+
+        unset($data['remove_image'], $data['remove_short_video']);
 
         $news->update($data);
 
@@ -60,15 +71,21 @@ class NewsService
      */
     public function delete(News $news): void
     {
-        if ($news->image) {
-            Storage::disk('public')->delete($news->image);
-        }
-
-        if ($news->short_video) {
-            Storage::disk('public')->delete($news->short_video);
-        }
+        $this->deleteFile($news->image);
+        $this->deleteFile($news->short_video);
 
         $news->delete();
+    }
+
+    /**
+     * Safely delete a file from the public disk.
+     * Skips legacy base64 data URLs and non-existent paths.
+     */
+    private function deleteFile(?string $path): void
+    {
+        if ($path) {
+            Storage::disk('public')->delete($path);
+        }
     }
 
     /**
@@ -76,20 +93,16 @@ class NewsService
      */
     private function prepareData(array $data, ?News $existing = null): array
     {
-        // Slug
         if (empty($data['slug'])) {
             $data['slug'] = News::generateSlug($data['title'], $existing?->id);
         }
 
-        // Reading time
         $data['reading_time'] = News::estimateReadingTime($data['content']);
 
-        // Auto excerpt
         if (empty($data['excerpt'])) {
             $data['excerpt'] = mb_substr(strip_tags($data['content']), 0, 200);
         }
 
-        // Auto published_at when first publishing
         if (
             isset($data['status']) &&
             $data['status'] === 'published' &&

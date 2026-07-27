@@ -3,6 +3,7 @@ import { Head, usePage, router, useForm } from '@inertiajs/react';
 import { Header } from '@/components/welcome/header';
 import { Footer } from '@/components/welcome/footer';
 import { GradientPlaceholder } from '@/components/welcome/gradient-placeholder';
+import { imageUrl } from '@/lib/utils';
 import {
     Clock, Eye, User, Calendar, Tag, ChevronRight, ArrowLeft,
     Share2, Facebook, Twitter, Link2, CheckCheck, Flame,
@@ -81,12 +82,6 @@ function formatDateShort(s: string | null): string {
     if (diff < 86400) return `${Math.floor(diff / 3600)} jam lalu`;
     if (diff < 604800) return `${Math.floor(diff / 86400)} hari lalu`;
     return d.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
-}
-
-function imageUrl(path: string | null | undefined): string | null {
-    if (!path) return null;
-    if (path.startsWith('http')) return path;
-    return `/storage/${path}`;
 }
 
 const CATEGORY_COLORS: Record<string, string> = {

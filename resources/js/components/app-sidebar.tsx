@@ -1,5 +1,15 @@
 import { Link, usePage } from '@inertiajs/react';
-import { LayoutGrid, MessageSquare, Newspaper, Shield, Users, Video } from 'lucide-react';
+import {
+    LayoutDashboard,
+    Newspaper,
+    Clapperboard,
+    MessageCircleMore,
+    BadgeDollarSign,
+    Inbox,
+    Images,
+    UsersRound,
+    ShieldCheck
+} from 'lucide-react';
 import AppLogo from '@/components/app-logo';
 import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
@@ -21,7 +31,7 @@ const mainNavItems: NavItem[] = [
     {
         title: 'Dashboard',
         href: dashboard(),
-        icon: LayoutGrid,
+        icon: LayoutDashboard,
     },
 ];
 
@@ -34,12 +44,27 @@ const featureNavItems: NavItem[] = [
     {
         title: 'Short Video',
         href: '/short-videos',
-        icon: Video,
+        icon: Clapperboard,
     },
     {
         title: 'Komentar',
         href: '/comments',
-        icon: MessageSquare,
+        icon: MessageCircleMore,
+    },
+    {
+        title: 'Iklan',
+        href: '/iklan',
+        icon: BadgeDollarSign,
+    },
+    {
+        title: 'Email',
+        href: '/email',
+        icon: Inbox,
+    },
+    {
+        title: 'Galeri',
+        href: '/gallery',
+        icon: Images,
     },
 ];
 
@@ -47,12 +72,12 @@ const userNavItems: NavItem[] = [
     {
         title: 'Manajemen User',
         href: '/users',
-        icon: Users,
+        icon: UsersRound,
     },
     {
         title: 'Role & Permission',
         href: '/roles',
-        icon: Shield,
+        icon: ShieldCheck,
     },
 ];
 
@@ -76,7 +101,7 @@ export function AppSidebar() {
 
     return (
         <Sidebar collapsible="icon" variant="inset">
-            <SidebarHeader>
+            <SidebarHeader className="pb-4 pt-5 px-4 mb-2">
                 <SidebarMenu>
                     <SidebarMenuItem>
                         <SidebarMenuButton size="lg" asChild>

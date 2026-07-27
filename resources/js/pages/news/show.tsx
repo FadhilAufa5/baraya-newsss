@@ -1,6 +1,7 @@
 import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
 import { useState } from 'react';
 import type { FormEvent } from 'react';
+import { imageUrl } from '@/lib/utils';
 import {
     ArrowLeft,
     Clock,
@@ -123,7 +124,7 @@ export default function ShowNews({ article, canManageComments }: Props) {
 
     const st = STATUS_CONFIG[article.status];
     const catColor = CATEGORY_COLORS[article.category] ?? 'bg-gray-500';
-    const imgUrl = article.image ? `/storage/${article.image}` : null;
+    const imgUrl = imageUrl(article.image);
     const videoUrl = article.short_video
         ? `/storage/${article.short_video}`
         : null;

@@ -7,7 +7,7 @@ import { TrendingTicker } from '@/components/welcome/trending-ticker';
 import { Footer } from '@/components/welcome/footer';
 import {
     Video, Search, ChevronRight, X, TrendingUp,
-    Flame, LayoutGrid,
+    Flame, LayoutGrid, Film, Eye,
 } from 'lucide-react';
 
 interface ShortVideo {
@@ -57,6 +57,12 @@ const POPULAR_TAGS = [
     '#WisataCiwidey', '#GedungSate', '#ShortsHariIni', '#KabarJabar',
 ];
 
+function formatViews(n: number) {
+    if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}Jt`;
+    if (n >= 1_000) return `${(n / 1_000).toFixed(1)}Rb`;
+    return String(n);
+}
+
 export default function PublicShortVideos({ videos, filters }: Props) {
     const { auth } = usePage<{ auth: { user: unknown } }>().props;
     const [searchQuery, setSearchQuery]   = useState(filters.search ?? '');
@@ -74,6 +80,8 @@ export default function PublicShortVideos({ videos, filters }: Props) {
     const activeIndex = activeVideo ? videos.data.findIndex((v) => v.id === activeVideo.id) : -1;
     const handlePrev = () => { if (activeIndex > 0) setActiveVideo(videos.data[activeIndex - 1]); };
     const handleNext = () => { if (activeIndex < videos.data.length - 1) setActiveVideo(videos.data[activeIndex + 1]); };
+
+    const totalViews = videos.data.reduce((sum, v) => sum + (v.views ?? 0), 0);
 
     return (
         <>
@@ -112,16 +120,12 @@ export default function PublicShortVideos({ videos, filters }: Props) {
 
                 {/* ─── HERO BANNER ─────────────────────────────────────── */}
                 <div className="relative overflow-hidden bg-white dark:bg-[#0a0a0f]">
-                    {/* Ambient glow — only visible in dark mode */}
                     <div className="absolute -top-20 -left-20 size-[400px] rounded-full bg-red-700/0 dark:bg-red-700/20 blur-[100px] pointer-events-none transition-all duration-500" />
                     <div className="absolute -bottom-20 right-0 size-[350px] rounded-full bg-indigo-700/0 dark:bg-indigo-700/15 blur-[120px] pointer-events-none transition-all duration-500" />
-
-                    {/* Light mode subtle gradient stripe */}
                     <div className="absolute inset-0 bg-gradient-to-br from-red-50/80 via-white to-gray-50 dark:from-transparent dark:via-transparent dark:to-transparent pointer-events-none" />
 
                     <div className="relative mx-auto max-w-[1280px] px-4 sm:px-6 pt-8 pb-10">
                         <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-6">
-
                             {/* Left: heading */}
                             <div className="space-y-3 max-w-xl">
                                 <div className="inline-flex items-center gap-2 rounded-full bg-red-100 dark:bg-red-600/15 border border-red-200 dark:border-red-600/25 px-3 py-1">
@@ -144,15 +148,13 @@ export default function PublicShortVideos({ videos, filters }: Props) {
                             {/* Right: Stats & Desktop Search */}
                             <div className="flex flex-col gap-3 sm:items-end">
                                 <div className="flex items-center gap-3">
-                                    {/* Total videos */}
                                     <div className="rounded-2xl bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/8 px-4 py-2.5 text-center">
                                         <div className="text-xl font-black text-gray-800 dark:text-white">{videos.total}</div>
                                         <div className="text-[9px] uppercase tracking-widest text-gray-400 dark:text-gray-400 font-bold">Total Video</div>
                                     </div>
-                                    {/* Current page */}
                                     <div className="rounded-2xl bg-red-50 dark:bg-red-600/15 border border-red-200 dark:border-red-600/25 px-4 py-2.5 text-center">
-                                        <div className="text-xl font-black text-red-600 dark:text-red-400">{videos.current_page}</div>
-                                        <div className="text-[9px] uppercase tracking-widest text-red-500/70 dark:text-red-400/70 font-bold">Halaman</div>
+                                        <div className="text-xl font-black text-red-600 dark:text-red-400">{formatViews(totalViews)}</div>
+                                        <div className="text-[9px] uppercase tracking-widest text-red-500/70 dark:text-red-400/70 font-bold">Total Views</div>
                                     </div>
                                 </div>
 
@@ -209,7 +211,6 @@ export default function PublicShortVideos({ videos, filters }: Props) {
 
                         {/* ─── SIDEBAR ─────────────────────────── */}
                         <aside className="hidden lg:flex flex-col gap-4">
-
                             {/* Categories */}
                             <div className="rounded-2xl bg-white dark:bg-white/4 border border-gray-200 dark:border-white/8 p-4 shadow-sm dark:shadow-none">
                                 <h3 className="text-[9px] font-black uppercase tracking-[0.15em] text-gray-400 mb-3 flex items-center gap-1.5">
@@ -268,7 +269,6 @@ export default function PublicShortVideos({ videos, filters }: Props) {
 
                         {/* ─── MAIN CONTENT ────────────────────── */}
                         <div className="space-y-4">
-
                             {/* Toolbar */}
                             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between rounded-2xl bg-white dark:bg-white/4 border border-gray-200 dark:border-white/8 px-4 py-3 shadow-sm dark:shadow-none">
                                 <div className="flex items-center gap-2.5">

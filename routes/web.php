@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AdController;
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\NewsController;
 use App\Http\Controllers\WelcomeController;
@@ -43,6 +44,15 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('short-videos', [ShortVideoController::class, 'store'])->name('short-videos.store');
     Route::delete('short-videos/{shortVideo}', [ShortVideoController::class, 'destroy'])->name('short-videos.destroy');
 
+    // iklan Management
+    Route::get('iklan', [AdController::class, 'index'])->name('iklan.index');
+    Route::get('iklan/create', [AdController::class, 'create'])->name('iklan.create');
+    Route::post('iklan', [AdController::class, 'store'])->name('iklan.store');
+    Route::get('iklan/{ad}/edit', [AdController::class, 'edit'])->name('iklan.edit');
+    Route::put('iklan/{ad}', [AdController::class, 'update'])->name('iklan.update');
+    Route::delete('iklan/{ad}', [AdController::class, 'destroy'])->name('iklan.destroy');
+    Route::post('iklan/{ad}/toggle', [AdController::class, 'toggle'])->name('iklan.toggle');
+
     // User Management
     Route::resource('users', UserController::class)->except(['show']);
 
@@ -58,7 +68,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('api/comments/{commentId}/reply', [CommentActionController::class, 'reply'])->name('comments.reply');
     Route::post('api/comments/{commentId}/report', [CommentActionController::class, 'report'])->name('comments.report');
 
-    // User profile edits & uploads
+    // User profile edits & uploiklan
     Route::patch('settings/profile/extra', [UserProfileController::class, 'update'])->name('profile.extra.update');
     Route::post('settings/profile/avatar', [UserProfileController::class, 'uploadAvatar'])->name('profile.avatar.upload');
     Route::post('settings/profile/cover', [UserProfileController::class, 'uploadCover'])->name('profile.cover.upload');

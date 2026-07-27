@@ -2,23 +2,25 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\User;
 use App\Models\News;
-use App\Models\UserProfile;
+use App\Models\User;
+use App\Services\UserProfileService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 
 class UserProfileController extends Controller
 {
+    public function __construct(
+        private readonly UserProfileService $profileService,
+    ) {}
+
     /**
      * Show a user's public profile page.
      */
     public function show(Request $request, int $userId)
     {
         $user = User::with(['profile'])->findOrFail($userId);
-        
-        // Eager load articles published by this user
+
         $articles = News::where('user_id', $user->id)
             ->published()
             ->latest('published_at')
@@ -63,14 +65,9 @@ class UserProfileController extends Controller
             'social_links.facebook' => 'nullable|url|max:255',
         ]);
 
-        $user->profile()->updateOrCreate(
-            ['user_id' => $user->id],
-            [
-                'bio' => $request->bio,
-                'website' => $request->website,
-                'social_links' => $request->social_links,
-            ]
-        );
+        $this->profileService->updateProfile($user, $request->only([
+            'bio', 'website', 'social_links',
+        ]));
 
         Inertia::flash('toast', ['type' => 'success', 'message' => 'Profil berhasil diperbarui.']);
 
@@ -88,20 +85,10 @@ class UserProfileController extends Controller
         }
 
         $request->validate([
-            'avatar' => 'required|image|max:2048', // max 2MB
+            'avatar' => 'required|image|max:2048',
         ]);
 
-        $profile = $user->profile()->firstOrCreate(['user_id' => $user->id]);
-
-        if ($request->hasFile('avatar')) {
-            // Delete old avatar if exists
-            if ($profile->avatar) {
-                Storage::disk('public')->delete($profile->avatar);
-            }
-
-            $path = $request->file('avatar')->store('avatars', 'public');
-            $profile->update(['avatar' => $path]);
-        }
+        $this->profileService->uploadAvatar($user, $request->file('avatar'));
 
         Inertia::flash('toast', ['type' => 'success', 'message' => 'Foto profil berhasil diperbarui.']);
 
@@ -119,20 +106,10 @@ class UserProfileController extends Controller
         }
 
         $request->validate([
-            'cover_image' => 'required|image|max:4096', // max 4MB
+            'cover_image' => 'required|image|max:4096',
         ]);
 
-        $profile = $user->profile()->firstOrCreate(['user_id' => $user->id]);
-
-        if ($request->hasFile('cover_image')) {
-            // Delete old cover if exists
-            if ($profile->cover_image) {
-                Storage::disk('public')->delete($profile->cover_image);
-            }
-
-            $path = $request->file('cover_image')->store('covers', 'public');
-            $profile->update(['cover_image' => $path]);
-        }
+        $this->profileService->uploadCover($user, $request->file('cover_image'));
 
         Inertia::flash('toast', ['type' => 'success', 'message' => 'Header profil berhasil diperbarui.']);
 

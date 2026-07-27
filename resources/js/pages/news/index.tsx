@@ -16,6 +16,7 @@ import {
     Dialog, DialogContent, DialogDescription, DialogFooter,
     DialogHeader, DialogTitle,
 } from '@/components/ui/dialog';
+import { imageUrl } from '@/lib/utils';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -79,11 +80,6 @@ const CATEGORY_TEXT: Record<string, string> = {
 function formatDate(s: string | null) {
     if (!s) return '—';
     return new Date(s).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' });
-}
-
-function imageUrl(path: string | null) {
-    if (!path) return null;
-    return `/storage/${path}`;
 }
 
 // ─── Delete Confirm Dialog ─────────────────────────────────────────────────────

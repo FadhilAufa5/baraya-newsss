@@ -14,7 +14,11 @@ interface ShortVideo {
     created_at: string;
 }
 
-function mediaUrl(path: string) {
+function mediaUrl(path: string | null | undefined): string | null {
+    if (!path) return null;
+    if (path.startsWith('http') || path.startsWith('data:') || path.startsWith('/')) {
+        return path;
+    }
     return `/storage/${path}`;
 }
 
@@ -27,7 +31,7 @@ function formatViews(n: number) {
 function timeAgo(value: string | null) {
     if (!value) return 'Belum tayang';
     const diff = Math.floor((Date.now() - new Date(value).getTime()) / 1000);
-    if (diff < 60) return `${diff}d lalu`;
+    if (diff < 60) return `${diff} detik lalu`;
     if (diff < 3600) return `${Math.floor(diff / 60)} mnt lalu`;
     if (diff < 86400) return `${Math.floor(diff / 3600)} jam lalu`;
     if (diff < 604800) return `${Math.floor(diff / 86400)} hari lalu`;

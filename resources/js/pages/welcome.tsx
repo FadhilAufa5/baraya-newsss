@@ -7,6 +7,7 @@ import { HeroSection } from '@/components/welcome/hero-section';
 import { NewsSections } from '@/components/welcome/news-sections';
 import { Footer } from '@/components/welcome/footer';
 import { GradientPlaceholder } from '@/components/welcome/gradient-placeholder';
+import { imageUrl } from '@/lib/utils';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -32,6 +33,17 @@ interface ShortVideoItem {
     views: number;
 }
 
+interface Ad {
+    id: number;
+    title: string;
+    sponsor_name: string | null;
+    description: string | null;
+    cta_text: string;
+    cta_url: string;
+    type: 'leaderboard' | 'in-feed' | 'rectangle';
+    position: 'top' | 'middle' | 'sidebar';
+}
+
 interface Props {
     heroArticle:      Article | null;
     sideArticles:     Article[];
@@ -42,6 +54,7 @@ interface Props {
     shortVideos:      ShortVideoItem[];
     filteredArticles: Article[];
     filters:          { search?: string; category?: string };
+    ads:              Ad[];
 }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -52,12 +65,6 @@ function formatDate(dateStr: string | null): string {
     return d.toLocaleDateString('id-ID', {
         day: '2-digit', month: 'long', year: 'numeric',
     }) + ' • ' + d.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) + ' WIB';
-}
-
-function imageUrl(path: string | null | undefined): string | null {
-    if (!path) return null;
-    if (path.startsWith('http')) return path;
-    return `/storage/${path}`;
 }
 
 // ─── Component ────────────────────────────────────────────────────────────────
@@ -72,6 +79,7 @@ export default function Welcome({
     shortVideos,
     filteredArticles,
     filters,
+    ads,
 }: Props) {
     const { auth } = usePage<{ auth: { user: unknown } }>().props;
 
@@ -137,6 +145,11 @@ export default function Welcome({
         ? trendingItems
         : ['Baraya News — Portal Berita Terkini Jawa Barat'];
 
+    // Filter ads by position ─────────────────────────────────────────────
+    const topAds = ads.filter((a) => a.position === 'top');
+    const middleAds = ads.filter((a) => a.position === 'middle');
+    const sidebarAds = ads.filter((a) => a.position === 'sidebar');
+
     return (
         <>
             <Head title="Baraya News - Portal Berita Terkini Jawa Barat" />
@@ -162,14 +175,17 @@ export default function Welcome({
                 <div className="mx-auto max-w-[1280px] px-4 py-6 sm:px-6 space-y-8">
 
                     {/* Leaderboard Ad */}
-                    <AdBanner
-                        type="leaderboard"
-                        sponsorName="Kawah Putih Ciwidey"
-                        title="Liburan Seru ke Kawah Putih Ciwidey - Tiket Masuk Diskon 20%!"
-                        description="Nikmati eksotisme danau kawah vulkanik Ciwidey yang menakjubkan dengan udara pegunungan yang sejuk. Berlaku khusus untuk pemesanan online minggu ini."
-                        ctaText="Dapatkan Tiket"
-                        ctaUrl="https://kawahputihciwidey.com"
-                    />
+                    {topAds.map((ad) => (
+                        <AdBanner
+                            key={ad.id}
+                            type={ad.type}
+                            sponsorName={ad.sponsor_name ?? 'Sponsor'}
+                            title={ad.title}
+                            description={ad.description ?? ''}
+                            ctaText={ad.cta_text}
+                            ctaUrl={ad.cta_url}
+                        />
+                    ))}
 
                     {isDefaultView && heroNorm ? (
                         <>
@@ -180,14 +196,17 @@ export default function Welcome({
                             />
 
                             {/* In-feed Ad */}
-                            <AdBanner
-                                type="in-feed"
-                                sponsorName="Persib Store Official"
-                                title="Jersey Persib Bandung 2026 Edisi Spesial Juara Liga!"
-                                description="Dapatkan jersey resmi terbaru Persib Bandung dengan diskon 15% khusus pembaca Baraya News. Gunakan kode: PERS18JABAR."
-                                ctaText="Miliki Sekarang"
-                                ctaUrl="https://persibstore.id"
-                            />
+                            {middleAds.map((ad) => (
+                                <AdBanner
+                                    key={ad.id}
+                                    type={ad.type}
+                                    sponsorName={ad.sponsor_name ?? 'Sponsor'}
+                                    title={ad.title}
+                                    description={ad.description ?? ''}
+                                    ctaText={ad.cta_text}
+                                    ctaUrl={ad.cta_url}
+                                />
+                            ))}
 
                             {/* ROW 2: Berita Terbaru | Pilihan Redaksi | Populer */}
                             <NewsSections
@@ -342,6 +361,19 @@ export default function Welcome({
 
                             {/* Sidebar */}
                             <div className="space-y-6">
+                                {/* Sidebar Ads */}
+                                {sidebarAds.map((ad) => (
+                                    <AdBanner
+                                        key={ad.id}
+                                        type={ad.type}
+                                        sponsorName={ad.sponsor_name ?? 'Sponsor'}
+                                        title={ad.title}
+                                        description={ad.description ?? ''}
+                                        ctaText={ad.cta_text}
+                                        ctaUrl={ad.cta_url}
+                                    />
+                                ))}
+
                                 <div className="bg-white dark:bg-gray-950 p-5 rounded-xl border border-gray-200 dark:border-gray-850 shadow-sm space-y-4">
                                     <h3 className="text-xs font-black uppercase tracking-wider text-gray-900 dark:text-white border-b border-gray-100 dark:border-gray-800 pb-2">
                                         Terpopuler

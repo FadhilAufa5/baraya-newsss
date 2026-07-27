@@ -1,5 +1,6 @@
 import { Head, Link, router, useForm } from '@inertiajs/react';
 import { useState, useRef } from 'react';
+import { imageUrl } from '@/lib/utils';
 import {
     ArrowLeft,
     Film,
@@ -75,7 +76,7 @@ function formatDatetimeLocal(s: string | null): string {
 export default function EditNews({ article, categories }: Props) {
     const [tagInput, setTagInput] = useState('');
     const [imagePreview, setImagePreview] = useState<string | null>(
-        article.image ? `/storage/${article.image}` : null,
+        imageUrl(article.image),
     );
     const [removeCurrentImage, setRemoveCurrentImage] = useState(false);
     const [deleteOpen, setDeleteOpen] = useState(false);
@@ -101,8 +102,10 @@ export default function EditNews({ article, categories }: Props) {
         content: string;
         image: File | null;
         image_caption: string;
+        remove_image: boolean;
         short_video: File | null;
         short_video_caption: string;
+        remove_short_video: boolean;
         meta_description: string;
         tags: string[];
         status: 'draft' | 'published' | 'archived';
@@ -118,8 +121,10 @@ export default function EditNews({ article, categories }: Props) {
         content: article.content,
         image: null,
         image_caption: article.image_caption ?? '',
+        remove_image: false,
         short_video: null,
         short_video_caption: article.short_video_caption ?? '',
+        remove_short_video: false,
         meta_description: article.meta_description ?? '',
         tags: article.tags ?? [],
         status: article.status,
@@ -129,7 +134,13 @@ export default function EditNews({ article, categories }: Props) {
     });
 
     // Transform is called right before the request is sent — safe to read ref here.
-    transform((d) => ({ ...d, status: overrideStatusRef.current }));
+    transform((d) => {
+        const result: Record<string, unknown> = { ...d, status: overrideStatusRef.current };
+        for (const key of Object.keys(result)) {
+            if (result[key] === null || result[key] === '') delete result[key];
+        }
+        return result;
+    });
 
     const slugify = (text: string) =>
         text
@@ -150,30 +161,44 @@ export default function EditNews({ article, categories }: Props) {
     const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (!file) return;
-        setData('image', file);
-        setRemoveCurrentImage(false);
+        setData((prev) => ({
+            ...prev,
+            image: file,
+            remove_image: false,
+        }));
         const reader = new FileReader();
         reader.onload = () => setImagePreview(reader.result as string);
         reader.readAsDataURL(file);
     };
 
     const removeImage = () => {
-        setData('image', null);
+        setData((prev) => ({
+            ...prev,
+            image: null,
+            remove_image: true,
+        }));
         setImagePreview(null);
-        setRemoveCurrentImage(true);
         if (fileRef.current) fileRef.current.value = '';
     };
 
     const handleVideoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (!file) return;
-        setData('short_video', file);
+        setData((prev) => ({
+            ...prev,
+            short_video: file,
+            remove_short_video: false,
+        }));
         if (videoPreview && videoPreview.startsWith('blob:')) URL.revokeObjectURL(videoPreview);
         setVideoPreview(URL.createObjectURL(file));
     };
 
     const removeSelectedVideo = () => {
-        setData('short_video', null);
+        setData((prev) => ({
+            ...prev,
+            short_video: null,
+            remove_short_video: false, // We're not removing the backend video, just the locally selected one
+        }));
         if (videoPreview && videoPreview.startsWith('blob:')) URL.revokeObjectURL(videoPreview);
         setVideoPreview(article.short_video ? `/storage/${article.short_video}` : null);
         if (videoRef.current) videoRef.current.value = '';
@@ -442,7 +467,7 @@ export default function EditNews({ article, categories }: Props) {
                                 <input
                                     ref={fileRef}
                                     type="file"
-                                    accept="image/jpg,image/jpeg,image/png,image/webp"
+                                    accept="image/*"
                                     className="hidden"
                                     onChange={handleImageChange}
                                 />

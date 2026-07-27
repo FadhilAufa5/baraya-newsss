@@ -76,7 +76,13 @@ export default function CreateNews({ categories }: Props) {
     });
 
     // Transform is called right before the request is sent — safe to read ref here.
-    transform((d) => ({ ...d, status: overrideStatusRef.current }));
+    transform((d) => {
+        const result: Record<string, unknown> = { ...d, status: overrideStatusRef.current };
+        for (const key of Object.keys(result)) {
+            if (result[key] === null || result[key] === '') delete result[key];
+        }
+        return result;
+    });
 
     // Auto-generate slug from title
     const handleTitleChange = (val: string) => {
@@ -342,7 +348,7 @@ export default function CreateNews({ categories }: Props) {
                                 <input
                                     ref={fileRef}
                                     type="file"
-                                    accept="image/jpg,image/jpeg,image/png,image/webp"
+                                    accept="image/*"
                                     className="hidden"
                                     onChange={handleImageChange}
                                 />
