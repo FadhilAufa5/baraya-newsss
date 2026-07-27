@@ -249,7 +249,7 @@ export default function PublicProfile({ profileUser, articles }: Props) {
                                     return (
                                         <a
                                             key={article.id}
-                                            href={`/news/${article.id}`}
+                                            href={`/news/${article.slug}`}
                                             className="group flex flex-col sm:flex-row gap-4 p-4 rounded-xl border border-gray-100 dark:border-gray-800 hover:border-red-200 dark:hover:border-red-900/50 hover:bg-red-50/20 dark:hover:bg-red-950/10 transition-colors"
                                         >
                                             {/* Thumbnail */}

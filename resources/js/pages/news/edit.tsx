@@ -221,12 +221,12 @@ export default function EditNews({ article, categories }: Props) {
     const submit = (submitStatus: 'draft' | 'published' | 'archived') => {
         // Set the ref BEFORE calling post() so transform() picks it up synchronously.
         overrideStatusRef.current = submitStatus;
-        post(`/news/${article.id}`, { forceFormData: true });
+        post(`/news/${article.slug}`, { forceFormData: true });
     };
 
     const handleDelete = () => {
         setDeleting(true);
-        router.delete(`/news/${article.id}`, {
+        router.delete(`/news/${article.slug}`, {
             onFinish: () => setDeleting(false),
         });
     };
@@ -503,95 +503,6 @@ export default function EditNews({ article, categories }: Props) {
                             </CardContent>
                         </Card>
 
-                        {/* Short video */}
-                        <Card>
-                            <CardHeader className="pb-3">
-                                <CardTitle className="flex items-center gap-2 text-sm font-semibold">
-                                    <Film className="size-4 text-muted-foreground" />
-                                    Short Video
-                                </CardTitle>
-                            </CardHeader>
-                            <CardContent className="flex flex-col gap-3">
-                                {videoPreview ? (
-                                    <div className="relative overflow-hidden rounded-xl border bg-black">
-                                        <video
-                                            src={videoPreview}
-                                            controls
-                                            className="h-72 w-full object-contain"
-                                        />
-                                        {data.short_video && (
-                                            <button
-                                                type="button"
-                                                onClick={removeSelectedVideo}
-                                                className="absolute top-2 right-2 flex size-8 items-center justify-center rounded-full bg-black/60 text-white hover:bg-black/80"
-                                            >
-                                                <X className="size-4" />
-                                            </button>
-                                        )}
-                                        {article.short_video &&
-                                            !data.short_video && (
-                                                <span className="absolute bottom-2 left-2 rounded-full bg-black/60 px-2 py-0.5 text-xs text-white">
-                                                    Video saat ini
-                                                </span>
-                                            )}
-                                    </div>
-                                ) : (
-                                    <button
-                                        type="button"
-                                        onClick={() =>
-                                            videoRef.current?.click()
-                                        }
-                                        className="flex h-44 w-full flex-col items-center justify-center gap-3 rounded-xl border-2 border-dashed border-muted-foreground/25 bg-muted/20 text-muted-foreground transition-colors hover:border-primary/40 hover:bg-muted/40 hover:text-foreground"
-                                    >
-                                        <Upload className="size-8 opacity-50" />
-                                        <div className="text-center">
-                                            <p className="text-sm font-medium">
-                                                Klik untuk upload short video
-                                            </p>
-                                            <p className="text-xs">
-                                                MP4, WebM, MOV - maks 50MB
-                                            </p>
-                                        </div>
-                                    </button>
-                                )}
-                                <input
-                                    ref={videoRef}
-                                    type="file"
-                                    accept="video/mp4,video/webm,video/quicktime"
-                                    className="hidden"
-                                    onChange={handleVideoChange}
-                                />
-                                <Button
-                                    type="button"
-                                    variant="outline"
-                                    size="sm"
-                                    onClick={() => videoRef.current?.click()}
-                                    className="gap-2"
-                                >
-                                    <Upload className="size-3.5" />
-                                    {videoPreview
-                                        ? 'Ganti Video'
-                                        : 'Upload Video'}
-                                </Button>
-                                <div className="grid gap-1.5">
-                                    <Label htmlFor="short_video_caption">
-                                        Keterangan Video
-                                    </Label>
-                                    <Input
-                                        id="short_video_caption"
-                                        value={data.short_video_caption}
-                                        onChange={(e) =>
-                                            setData(
-                                                'short_video_caption',
-                                                e.target.value,
-                                            )
-                                        }
-                                        placeholder="Sumber / deskripsi video..."
-                                    />
-                                </div>
-                                <InputError message={errors.short_video} />
-                            </CardContent>
-                        </Card>
 
                         {/* Konten */}
                         <Card>
@@ -660,7 +571,7 @@ export default function EditNews({ article, categories }: Props) {
                                                 onKeyDown={(e) =>
                                                     e.key === 'Enter' &&
                                                     (e.preventDefault(),
-                                                    addTag())
+                                                        addTag())
                                                 }
                                                 placeholder="Ketik tag lalu Enter..."
                                                 className="pl-8"
@@ -770,11 +681,10 @@ export default function EditNews({ article, categories }: Props) {
                                             !data.is_featured,
                                         )
                                     }
-                                    className={`flex items-center gap-3 rounded-xl border p-3 transition-all ${
-                                        data.is_featured
-                                            ? 'border-amber-400 bg-amber-50 dark:bg-amber-900/20'
-                                            : 'border-border hover:border-amber-300'
-                                    }`}
+                                    className={`flex items-center gap-3 rounded-xl border p-3 transition-all ${data.is_featured
+                                        ? 'border-amber-400 bg-amber-50 dark:bg-amber-900/20'
+                                        : 'border-border hover:border-amber-300'
+                                        }`}
                                 >
                                     <Star
                                         className={`size-5 ${data.is_featured ? 'fill-amber-400 text-amber-400' : 'text-muted-foreground'}`}
@@ -814,12 +724,6 @@ export default function EditNews({ article, categories }: Props) {
                                         <span>Gambar</span>
                                         <span className="font-medium text-foreground">
                                             {imagePreview ? '✓' : '—'}
-                                        </span>
-                                    </div>
-                                    <div className="flex justify-between">
-                                        <span>Short Video</span>
-                                        <span className="font-medium text-foreground">
-                                            {videoPreview ? 'Ada' : '—'}
                                         </span>
                                     </div>
                                 </div>

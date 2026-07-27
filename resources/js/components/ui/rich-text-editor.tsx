@@ -4,13 +4,17 @@ import Underline from '@tiptap/extension-underline';
 import TextAlign from '@tiptap/extension-text-align';
 import Placeholder from '@tiptap/extension-placeholder';
 import CharacterCount from '@tiptap/extension-character-count';
+import Link from '@tiptap/extension-link';
+import Image from '@tiptap/extension-image';
 import {
     Bold, Italic, Underline as UnderlineIcon, Strikethrough,
     List, ListOrdered, Quote, Code, Minus,
     AlignLeft, AlignCenter, AlignRight, AlignJustify,
     Heading1, Heading2, Heading3, Undo, Redo,
+    Link as LinkIcon, Unlink, ImagePlus,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useEffect, useCallback } from 'react';
 
 interface RichTextEditorProps {
     value: string;
@@ -63,23 +67,72 @@ export default function RichTextEditor({
         extensions: [
             StarterKit.configure({
                 heading: { levels: [1, 2, 3] },
+                // HardBreak is included in StarterKit by default (Shift+Enter)
             }),
             Underline,
             TextAlign.configure({ types: ['heading', 'paragraph'] }),
             Placeholder.configure({ placeholder }),
             CharacterCount,
+            Link.configure({
+                openOnClick: false,
+                HTMLAttributes: {
+                    class: 'text-red-600 underline hover:text-red-700 cursor-pointer',
+                },
+            }),
+            Image.configure({
+                inline: false,
+                allowBase64: true,
+                HTMLAttributes: {
+                    class: 'rounded-xl shadow-md max-w-full mx-auto',
+                },
+            }),
         ],
         content: value,
-        onUpdate: ({ editor }) => {
-            onChange(editor.getHTML());
+        onUpdate: ({ editor: ed }) => {
+            onChange(ed.getHTML());
         },
         editorProps: {
             attributes: {
                 class: 'prose prose-sm dark:prose-invert max-w-none focus:outline-none px-4 py-3',
                 style: `min-height: ${minHeight}px`,
             },
+            // Preserve whitespace and allow proper Enter key behavior
+            handleKeyDown: (_view, event) => {
+                // Shift+Enter inserts a hard break (<br>), Enter creates a new paragraph (<p>)
+                // This is the default TipTap behavior — just making sure it's not blocked
+                return false;
+            },
         },
     });
+
+    // Sync external value changes (e.g. when editing an existing article)
+    useEffect(() => {
+        if (editor && value !== editor.getHTML()) {
+            editor.commands.setContent(value, false);
+        }
+    // Only sync when value changes from outside (not from internal edits)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [value]);
+
+    const setLink = useCallback(() => {
+        if (!editor) return;
+        const previousUrl = editor.getAttributes('link').href;
+        const url = window.prompt('URL', previousUrl);
+        if (url === null) return; // cancelled
+        if (url === '') {
+            editor.chain().focus().extendMarkRange('link').unsetLink().run();
+            return;
+        }
+        editor.chain().focus().extendMarkRange('link').setLink({ href: url }).run();
+    }, [editor]);
+
+    const addImage = useCallback(() => {
+        if (!editor) return;
+        const url = window.prompt('URL Gambar');
+        if (url) {
+            editor.chain().focus().setImage({ src: url }).run();
+        }
+    }, [editor]);
 
     if (!editor) return null;
 
@@ -132,6 +185,19 @@ export default function RichTextEditor({
 
                 <ToolbarDivider />
 
+                {/* Link & Image */}
+                <ToolbarButton title="Tambah Link" onClick={setLink} active={editor.isActive('link')}>
+                    <LinkIcon className="size-3.5" />
+                </ToolbarButton>
+                <ToolbarButton title="Hapus Link" onClick={() => editor.chain().focus().unsetLink().run()} disabled={!editor.isActive('link')}>
+                    <Unlink className="size-3.5" />
+                </ToolbarButton>
+                <ToolbarButton title="Tambah Gambar" onClick={addImage}>
+                    <ImagePlus className="size-3.5" />
+                </ToolbarButton>
+
+                <ToolbarDivider />
+
                 {/* Alignment */}
                 <ToolbarButton title="Align Left" onClick={() => editor.chain().focus().setTextAlign('left').run()} active={editor.isActive({ textAlign: 'left' })}>
                     <AlignLeft className="size-3.5" />
@@ -167,10 +233,15 @@ export default function RichTextEditor({
             <EditorContent editor={editor} />
 
             {/* Word / char count */}
-            <div className="flex items-center justify-end gap-3 border-t bg-muted/20 px-4 py-1.5 text-xs text-muted-foreground">
-                <span>{wordCount} kata</span>
-                <span>·</span>
-                <span>{charCount} karakter</span>
+            <div className="flex items-center justify-between gap-3 border-t bg-muted/20 px-4 py-1.5 text-xs text-muted-foreground">
+                <span className="text-muted-foreground/60">
+                    Enter = paragraf baru · Shift+Enter = baris baru
+                </span>
+                <div className="flex items-center gap-3">
+                    <span>{wordCount} kata</span>
+                    <span>·</span>
+                    <span>{charCount} karakter</span>
+                </div>
             </div>
         </div>
     );

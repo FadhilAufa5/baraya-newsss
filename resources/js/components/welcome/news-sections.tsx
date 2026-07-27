@@ -64,7 +64,7 @@ export function NewsSections({
 
                 <div className="space-y-4">
                     {beritaTerbaru.map((art) => (
-                        <a key={art.id} href={`/news/${art.id}`} className="group flex gap-3 rounded-xl bg-white dark:bg-gray-800 shadow-sm overflow-hidden hover:shadow-md transition-shadow cursor-pointer">
+                        <a key={art.id} href={`/news/${art.slug}`} className="group flex gap-3 rounded-xl bg-white dark:bg-gray-800 shadow-sm overflow-hidden hover:shadow-md transition-shadow cursor-pointer">
                             <div className="w-28 shrink-0 sm:w-32">
                                 {art.image ? (
                                     <img
@@ -102,7 +102,7 @@ export function NewsSections({
                     <h2 className="text-sm font-black uppercase tracking-wide text-gray-800 dark:text-gray-100">Pilihan Redaksi</h2>
                 </div>
 
-                <a href={`/news/${pilihanRedaksi.id}`} className="group cursor-pointer rounded-xl bg-white dark:bg-gray-800 shadow-sm overflow-hidden hover:shadow-md transition-shadow block">
+                <a href={`/news/${pilihanRedaksi.slug}`} className="group cursor-pointer rounded-xl bg-white dark:bg-gray-800 shadow-sm overflow-hidden hover:shadow-md transition-shadow block">
                     <div className="relative aspect-video w-full">
                         {pilihanRedaksi.image ? (
                             <img
@@ -175,7 +175,7 @@ export function NewsSections({
 
                 <div className="rounded-xl bg-white dark:bg-gray-800 shadow-sm overflow-hidden divide-y divide-gray-100 dark:divide-gray-700">
                     {beritaTerpopuler.map((art, idx) => (
-                        <a key={art.id} href={`/news/${art.id}`} className="group flex items-start gap-3 px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-750 cursor-pointer transition-colors">
+                        <a key={art.id} href={`/news/${art.slug}`} className="group flex items-start gap-3 px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-750 cursor-pointer transition-colors">
                             <span className={`shrink-0 text-3xl font-black leading-none ${idx === 0 ? 'text-red-600' : idx === 1 ? 'text-orange-400' : idx === 2 ? 'text-amber-400' : 'text-gray-300 dark:text-gray-600'}`}>
                                 {idx + 1}
                             </span>

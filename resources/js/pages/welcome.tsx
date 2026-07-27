@@ -45,16 +45,16 @@ interface Ad {
 }
 
 interface Props {
-    heroArticle:      Article | null;
-    sideArticles:     Article[];
-    beritaTerbaru:    Article[];
-    pilihanRedaksi:   Article | null;
+    heroArticle: Article | null;
+    sideArticles: Article[];
+    beritaTerbaru: Article[];
+    pilihanRedaksi: Article | null;
     beritaTerpopuler: { id: number; title: string; slug: string; published_at: string | null; views: number }[];
-    trendingItems:    string[];
-    shortVideos:      ShortVideoItem[];
+    trendingItems: string[];
+    shortVideos: ShortVideoItem[];
     filteredArticles: Article[];
-    filters:          { search?: string; category?: string };
-    ads:              Ad[];
+    filters: { search?: string; category?: string };
+    ads: Ad[];
 }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -84,8 +84,8 @@ export default function Welcome({
     const { auth } = usePage<{ auth: { user: unknown } }>().props;
 
     const [activeCategory, setActiveCategory] = useState(filters.category ?? 'Home');
-    const [searchQuery, setSearchQuery]       = useState(filters.search ?? '');
-    const [trendingIndex, setTrendingIndex]   = useState(0);
+    const [searchQuery, setSearchQuery] = useState(filters.search ?? '');
+    const [trendingIndex, setTrendingIndex] = useState(0);
 
     // ── Navigation helpers ──────────────────────────────────────────────────
     const navigate = (cat: string, search: string) => {
@@ -104,15 +104,13 @@ export default function Welcome({
         setSearchQuery(q);
     };
 
-    // Trigger search on Enter key — header calls this automatically via input onChange
-    // We watch the input via router.get on "Enter" through the Header component's button
-    // For simplicity, we re-navigate whenever search state is committed (debounce via Enter):
+
     const handleSearchSubmit = () => {
         navigate(activeCategory, searchQuery);
     };
 
     // ── Derived state ───────────────────────────────────────────────────────
-    const isDefaultView    = (!filters.search && (!filters.category || filters.category === 'Home'));
+    const isDefaultView = (!filters.search && (!filters.category || filters.category === 'Home'));
     const isVideoStoryView = filters.category === 'Video Story';
 
     // Normalise article shapes for child components ─────────────────────────
@@ -122,15 +120,15 @@ export default function Welcome({
         image: imageUrl(art.image),
     });
 
-    const heroNorm          = heroArticle ? normalise(heroArticle) : null;
-    const sideNorm          = sideArticles.map(normalise);
-    const terbaru           = beritaTerbaru.map(normalise);
-    const pilihanNorm       = pilihanRedaksi ? normalise(pilihanRedaksi) : null;
-    const terpopuler        = beritaTerpopuler.map((a) => ({
+    const heroNorm = heroArticle ? normalise(heroArticle) : null;
+    const sideNorm = sideArticles.map(normalise);
+    const terbaru = beritaTerbaru.map(normalise);
+    const pilihanNorm = pilihanRedaksi ? normalise(pilihanRedaksi) : null;
+    const terpopuler = beritaTerpopuler.map((a) => ({
         ...a,
         published_at: formatDate(a.published_at),
     }));
-    const filteredNorm      = filteredArticles.map(normalise);
+    const filteredNorm = filteredArticles.map(normalise);
 
     // Video Story items for NewsSections ────────────────────────────────────
     const videoStoryItems = shortVideos.map((v) => ({
@@ -316,7 +314,7 @@ export default function Welcome({
                                                 <div className="flex-1 flex flex-col justify-between space-y-3 sm:space-y-2">
                                                     <div className="space-y-1.5">
                                                         <h3 className="text-sm font-bold text-gray-900 dark:text-white group-hover:text-red-600 dark:group-hover:text-red-500 transition-colors duration-200 leading-snug line-clamp-2">
-                                                            <a href={`/news/${article.id}`}>{article.title}</a>
+                                                            <a href={`/news/${article.slug}`}>{article.title}</a>
                                                         </h3>
                                                         <p className="text-xs text-gray-500 dark:text-gray-400 line-clamp-2 leading-relaxed">
                                                             {article.excerpt}
@@ -386,7 +384,7 @@ export default function Welcome({
                                                 </span>
                                                 <div className="space-y-1">
                                                     <h4 className="text-xs font-bold text-gray-800 dark:text-gray-200 group-hover:text-red-600 dark:group-hover:text-red-500 transition-colors line-clamp-2 leading-snug">
-                                                        <a href={`/news/${item.id}`}>{item.title}</a>
+                                                        <a href={`/news/${item.slug}`}>{item.title}</a>
                                                     </h4>
                                                     <span className="text-[10px] text-gray-400 dark:text-gray-500">{item.published_at}</span>
                                                 </div>

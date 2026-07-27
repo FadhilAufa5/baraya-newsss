@@ -131,14 +131,14 @@ export default function ShowNews({ article, canManageComments }: Props) {
 
     const handleDelete = () => {
         setDeleting(true);
-        router.delete(`/news/${article.id}`, {
+        router.delete(`/news/${article.slug}`, {
             onFinish: () => setDeleting(false),
         });
     };
 
     const submitComment = (e: FormEvent) => {
         e.preventDefault();
-        post(`/news/${article.id}/comments`, {
+        post(`/news/${article.slug}/comments`, {
             preserveScroll: true,
             onSuccess: () => reset('body'),
         });
@@ -217,7 +217,7 @@ export default function ShowNews({ article, canManageComments }: Props) {
                             size="sm"
                             className="gap-2"
                         >
-                            <Link href={`/news/${article.id}/edit`}>
+                            <Link href={`/news/${article.slug}/edit`}>
                                 <Edit2 className="size-4" />
                                 Edit
                             </Link>
@@ -476,7 +476,7 @@ export default function ShowNews({ article, canManageComments }: Props) {
                                 size="sm"
                                 className="bg-red-600 hover:bg-red-700"
                             >
-                                <Link href={`/news/${article.id}/edit`}>
+                                <Link href={`/news/${article.slug}/edit`}>
                                     <Edit2 className="mr-1.5 size-3.5" />
                                     Edit Artikel
                                 </Link>

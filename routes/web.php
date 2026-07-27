@@ -12,6 +12,7 @@ use App\Http\Controllers\SocialActionController;
 use App\Http\Controllers\CommentActionController;
 use App\Http\Controllers\OAuthController;
 use App\Http\Controllers\UserProfileController;
+use App\Http\Controllers\EmailController;
 use Illuminate\Support\Facades\Route;
 
 // ── Public routes ─────────────────────────────────────────────────────────────
@@ -73,6 +74,15 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::patch('settings/profile/extra', [UserProfileController::class, 'update'])->name('profile.extra.update');
     Route::post('settings/profile/avatar', [UserProfileController::class, 'uploadAvatar'])->name('profile.avatar.upload');
     Route::post('settings/profile/cover', [UserProfileController::class, 'uploadCover'])->name('profile.cover.upload');
+
+    // Email
+    Route::get('email', [EmailController::class, 'index'])->name('email.index');
+    Route::post('email', [EmailController::class, 'store'])->name('email.store');
+    Route::post('email/{email}/read', [EmailController::class, 'markRead'])->name('email.read');
+    Route::post('email/{email}/star', [EmailController::class, 'toggleStar'])->name('email.star');
+    Route::delete('email/{email}', [EmailController::class, 'destroy'])->name('email.destroy');
+    Route::delete('email/{id}/force', [EmailController::class, 'forceDelete'])->name('email.force-delete');
+    Route::post('email/{id}/restore', [EmailController::class, 'restore'])->name('email.restore');
 });
 
 // ── Public news show — MUST be declared AFTER the auth group so that

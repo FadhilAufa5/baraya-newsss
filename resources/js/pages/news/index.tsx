@@ -89,7 +89,7 @@ function DeleteDialog({ article, open, onClose }: { article: Article; open: bool
 
     const handleDelete = () => {
         setProcessing(true);
-        router.delete(`/news/${article.id}`, {
+        router.delete(`/news/${article.slug}`, {
             onFinish: () => { setProcessing(false); onClose(); },
         });
     };
@@ -157,7 +157,7 @@ function HeroCard({ article, onDelete }: { article: Article; onDelete: (a: Artic
 
                 {/* Title */}
                 <h2 className="text-2xl font-extrabold leading-tight text-white md:text-[2.2rem] line-clamp-3">
-                    <Link href={`/news/${article.id}`} className="hover:text-white/90 transition-colors">
+                    <Link href={`/news/${article.slug}`} className="hover:text-white/90 transition-colors">
                         {article.title}
                     </Link>
                 </h2>
@@ -189,10 +189,10 @@ function HeroCard({ article, onDelete }: { article: Article; onDelete: (a: Artic
                 {/* Action buttons */}
                 <div className="mt-5 flex flex-wrap items-center gap-2">
                     <Button asChild size="sm" className="bg-white text-slate-900 hover:bg-white/90 font-semibold shadow">
-                        <Link href={`/news/${article.id}`}>Baca Selengkapnya</Link>
+                        <Link href={`/news/${article.slug}`}>Baca Selengkapnya</Link>
                     </Button>
                     <Button asChild size="sm" variant="outline" className="border-white/25 text-white bg-white/5 hover:bg-white/15 backdrop-blur-sm">
-                        <Link href={`/news/${article.id}/edit`}><Edit2 className="mr-1.5 size-3.5" />Edit</Link>
+                        <Link href={`/news/${article.slug}/edit`}><Edit2 className="mr-1.5 size-3.5" />Edit</Link>
                     </Button>
                     <Button
                         size="sm"
@@ -220,7 +220,7 @@ function ArticleCard({ article, onDelete }: { article: Article; onDelete: (a: Ar
         <div className="group flex flex-col overflow-hidden rounded-xl border bg-card shadow-sm transition-all duration-200 hover:shadow-md hover:-translate-y-0.5">
             {/* Thumbnail */}
             <div className="relative h-48 overflow-hidden bg-muted flex-shrink-0">
-                <Link href={`/news/${article.id}`} className="block h-full w-full">
+                <Link href={`/news/${article.slug}`} className="block h-full w-full">
                     {img ? (
                         <img
                             src={img}
@@ -265,7 +265,7 @@ function ArticleCard({ article, onDelete }: { article: Article; onDelete: (a: Ar
 
                 {/* Title */}
                 <h3 className="font-bold leading-snug line-clamp-2 text-sm text-foreground group-hover:text-red-600 transition-colors duration-150">
-                    <Link href={`/news/${article.id}`}>
+                    <Link href={`/news/${article.slug}`}>
                         {article.title}
                     </Link>
                 </h3>
@@ -294,10 +294,10 @@ function ArticleCard({ article, onDelete }: { article: Article; onDelete: (a: Ar
                     {/* Actions */}
                     <div className="flex items-center gap-1.5 pt-0.5">
                         <Button asChild variant="outline" size="sm" className="h-7 flex-1 text-xs font-medium">
-                            <Link href={`/news/${article.id}`}>Lihat</Link>
+                            <Link href={`/news/${article.slug}`}>Lihat</Link>
                         </Button>
                         <Button asChild variant="outline" size="sm" className="h-7 w-8 p-0 text-muted-foreground hover:text-foreground">
-                            <Link href={`/news/${article.id}/edit`}><Edit2 className="size-3.5" /></Link>
+                            <Link href={`/news/${article.slug}/edit`}><Edit2 className="size-3.5" /></Link>
                         </Button>
                         <Button
                             variant="outline"

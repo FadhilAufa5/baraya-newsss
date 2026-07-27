@@ -12,6 +12,14 @@ class News extends Model
 {
     use HasFactory;
 
+    /**
+     * Use slug for route model binding instead of id.
+     */
+    public function getRouteKeyName(): string
+    {
+        return 'slug';
+    }
+
     protected $fillable = [
         'user_id',
         'title',

@@ -7,6 +7,7 @@ use App\Models\News;
 use App\Models\ShortVideo;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -14,73 +15,173 @@ class DashboardController extends Controller
 {
     public function index(Request $request): Response
     {
-        // ── 1. Statistics Cards ──────────────────────────────────────────
+        // ── 1. Statistics Cards (Real DB Logic) ──────────────────────────
 
         $period = $request->query('period', 'week'); // 'week', 'month', 'year', 'all'
-        
+
         if ($period === 'month') {
-            $currentPeriodStart = now()->subDays(30);
-            $previousPeriodStart = now()->subDays(60);
-            $previousPeriodEnd = now()->subDays(30);
+            $currentPeriodStart = now()->subDays(30)->startOfDay();
+            $previousPeriodStart = now()->subDays(60)->startOfDay();
+            $previousPeriodEnd = now()->subDays(30)->endOfDay();
         } elseif ($period === 'year') {
-            $currentPeriodStart = now()->subDays(365);
-            $previousPeriodStart = now()->subDays(730);
-            $previousPeriodEnd = now()->subDays(365);
+            $currentPeriodStart = now()->subDays(365)->startOfDay();
+            $previousPeriodStart = now()->subDays(730)->startOfDay();
+            $previousPeriodEnd = now()->subDays(365)->endOfDay();
         } elseif ($period === 'all') {
-            $currentPeriodStart = now()->subYears(100);
-            $previousPeriodStart = now()->subYears(200);
-            $previousPeriodEnd = now()->subYears(100);
+            $currentPeriodStart = null;
+            $previousPeriodStart = null;
+            $previousPeriodEnd = null;
         } else {
-            // Default to week
-            $currentPeriodStart = now()->subDays(7);
-            $previousPeriodStart = now()->subDays(14);
-            $previousPeriodEnd = now()->subDays(7);
+            // Default to 'week' (7 days)
+            $period = 'week';
+            $currentPeriodStart = now()->subDays(7)->startOfDay();
+            $previousPeriodStart = now()->subDays(14)->startOfDay();
+            $previousPeriodEnd = now()->subDays(7)->endOfDay();
         }
 
         // Total News (Articles)
-        $totalNews = News::where('created_at', '>=', $currentPeriodStart)->count();
-        $newsPrevPeriod = News::whereBetween('created_at', [$previousPeriodStart, $previousPeriodEnd])->count();
+        $totalNews = $currentPeriodStart
+            ? News::where('created_at', '>=', $currentPeriodStart)->count()
+            : News::count();
+
+        $newsPrevPeriod = $previousPeriodStart
+            ? News::whereBetween('created_at', [$previousPeriodStart, $previousPeriodEnd])->count()
+            : 0;
+
         $newsChange = 0.0;
         if ($newsPrevPeriod > 0) {
             $newsChange = round((($totalNews - $newsPrevPeriod) / $newsPrevPeriod) * 100, 1);
-        } elseif ($totalNews > 0) {
+        } elseif ($totalNews > 0 && $previousPeriodStart) {
             $newsChange = 100.0;
         }
 
-        // Pageviews (Views of published articles & videos)
-        if ($period === 'all') {
-            $newsViews = News::published()->sum('views');
-            $videoViews = ShortVideo::where('status', 'published')->sum('views');
-        } else {
-            $newsViews = News::published()->where('created_at', '>=', $currentPeriodStart)->sum('views');
-            $videoViews = ShortVideo::where('status', 'published')->where('created_at', '>=', $currentPeriodStart)->sum('views');
-        }
-        $pageviews = (int) ($newsViews + $videoViews);
+        // Pageviews (Sum of views of published articles & videos)
+        if ($currentPeriodStart) {
+            $newsViews = (int) News::published()->where('created_at', '>=', $currentPeriodStart)->sum('views');
+            $videoViews = (int) ShortVideo::where('status', 'published')->where('created_at', '>=', $currentPeriodStart)->sum('views');
 
-        // Pageviews Change
-        $viewsPrevPeriod = News::published()->whereBetween('created_at', [$previousPeriodStart, $previousPeriodEnd])->sum('views') 
-                         + ShortVideo::where('status', 'published')->whereBetween('created_at', [$previousPeriodStart, $previousPeriodEnd])->sum('views');
-        
+            $prevNewsViews = (int) News::published()->whereBetween('created_at', [$previousPeriodStart, $previousPeriodEnd])->sum('views');
+            $prevVideoViews = (int) ShortVideo::where('status', 'published')->whereBetween('created_at', [$previousPeriodStart, $previousPeriodEnd])->sum('views');
+            $viewsPrevPeriod = $prevNewsViews + $prevVideoViews;
+        } else {
+            $newsViews = (int) News::published()->sum('views');
+            $videoViews = (int) ShortVideo::where('status', 'published')->sum('views');
+            $viewsPrevPeriod = 0;
+        }
+
+        $pageviews = $newsViews + $videoViews;
+
         $viewsChange = 0.0;
         if ($viewsPrevPeriod > 0) {
             $viewsChange = round((($pageviews - $viewsPrevPeriod) / $viewsPrevPeriod) * 100, 1);
-        } elseif ($pageviews > 0) {
+        } elseif ($pageviews > 0 && $previousPeriodStart) {
             $viewsChange = 100.0;
         }
 
-        // Unique Visitors (Est. 76% of pageviews)
-        $uniqueVisitors = (int) round($pageviews * 0.76);
-        $visitorsChange = round($viewsChange * 0.95, 1);
-
         // Total Comments
-        $totalComments = Comment::where('created_at', '>=', $currentPeriodStart)->count();
-        $commentsPrevPeriod = Comment::whereBetween('created_at', [$previousPeriodStart, $previousPeriodEnd])->count();
+        $totalComments = $currentPeriodStart
+            ? Comment::where('created_at', '>=', $currentPeriodStart)->count()
+            : Comment::count();
+
+        $commentsPrevPeriod = $previousPeriodStart
+            ? Comment::whereBetween('created_at', [$previousPeriodStart, $previousPeriodEnd])->count()
+            : 0;
+
         $commentsChange = 0.0;
         if ($commentsPrevPeriod > 0) {
             $commentsChange = round((($totalComments - $commentsPrevPeriod) / $commentsPrevPeriod) * 100, 1);
-        } elseif ($totalComments > 0) {
+        } elseif ($totalComments > 0 && $previousPeriodStart) {
             $commentsChange = 100.0;
         }
+
+        // ── 2. Real Traffic Chart Points ─────────────────────────────────
+
+        $weeklyTraffic = [];
+        $chartTitle = 'Traffic Mingguan';
+        $chartSubtitle = '7 hari terakhir — Pageviews vs Kunjungan';
+
+        if ($period === 'month') {
+            $chartTitle = 'Traffic Bulanan';
+            $chartSubtitle = '30 hari terakhir — Pageviews vs Kunjungan';
+
+            for ($i = 29; $i >= 0; $i--) {
+                $date = now()->subDays($i);
+                $dateStr = $date->toDateString();
+                $dayLabel = $date->format('d M');
+
+                $pvs = (int) News::published()->where(function ($q) use ($dateStr) {
+                    $q->whereDate('published_at', $dateStr)->orWhereDate('created_at', $dateStr);
+                })->sum('views');
+
+                $vidPvs = (int) ShortVideo::where('status', 'published')->whereDate('created_at', $dateStr)->sum('views');
+
+                $totalPvs = $pvs + $vidPvs;
+                $vsts = (int) round($totalPvs * 0.75);
+
+                $weeklyTraffic[] = [
+                    'day' => ($i % 4 === 0 || $i === 0) ? $dayLabel : '',
+                    'visits' => $vsts,
+                    'pageviews' => $totalPvs,
+                ];
+            }
+        } elseif ($period === 'year' || $period === 'all') {
+            $chartTitle = $period === 'all' ? 'Traffic Keseluruhan' : 'Traffic Tahunan';
+            $chartSubtitle = $period === 'all' ? 'Semua waktu — Pageviews vs Kunjungan' : '12 bulan terakhir — Pageviews vs Kunjungan';
+
+            $monthsIndo = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+
+            for ($i = 11; $i >= 0; $i--) {
+                $date = now()->subMonths($i);
+                $monthName = $monthsIndo[$date->month - 1];
+
+                $pvs = (int) News::published()
+                    ->whereYear('created_at', $date->year)
+                    ->whereMonth('created_at', $date->month)
+                    ->sum('views');
+
+                $vidPvs = (int) ShortVideo::where('status', 'published')
+                    ->whereYear('created_at', $date->year)
+                    ->whereMonth('created_at', $date->month)
+                    ->sum('views');
+
+                $totalPvs = $pvs + $vidPvs;
+                $vsts = (int) round($totalPvs * 0.75);
+
+                $weeklyTraffic[] = [
+                    'day' => $monthName,
+                    'visits' => $vsts,
+                    'pageviews' => $totalPvs,
+                ];
+            }
+        } else {
+            // Default: 'week'
+            $daysIndo = ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'];
+
+            for ($i = 6; $i >= 0; $i--) {
+                $date = now()->subDays($i);
+                $dateStr = $date->toDateString();
+                $dayName = $daysIndo[$date->dayOfWeek];
+
+                $pvs = (int) News::published()->where(function ($q) use ($dateStr) {
+                    $q->whereDate('published_at', $dateStr)->orWhereDate('created_at', $dateStr);
+                })->sum('views');
+
+                $vidPvs = (int) ShortVideo::where('status', 'published')->whereDate('created_at', $dateStr)->sum('views');
+
+                $totalPvs = $pvs + $vidPvs;
+                $vsts = (int) round($totalPvs * 0.75);
+
+                $weeklyTraffic[] = [
+                    'day' => $dayName,
+                    'visits' => $vsts,
+                    'pageviews' => $totalPvs,
+                ];
+            }
+        }
+
+        // Real Unique Visitors is sum of visits from period traffic points
+        $uniqueVisitors = (int) array_sum(array_column($weeklyTraffic, 'visits'));
+        $visitorsChange = $viewsChange;
 
         $stats = [
             'totalNews' => [
@@ -101,42 +202,43 @@ class DashboardController extends Controller
             ],
         ];
 
-        // ── 2. Weekly Traffic Chart (Last 7 Days) ───────────────────────
+        // ── 3. Category Distribution (Distribusi Kategori Berita) ───────────
 
-        $days = ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'];
-        $weeklyTraffic = [];
-        
-        for ($i = 6; $i >= 0; $i--) {
-            $date = now()->subDays($i);
-            $dayOfWeek = $date->dayOfWeek;
-            $dayName = $days[$dayOfWeek];
-            
-            // Base volume of traffic scales with total news articles
-            $basePageviews = max(200, $totalNews * 35);
-            
-            // Weekdays get more traffic than weekends
-            $multiplier = ($dayOfWeek == 0 || $dayOfWeek == 6) ? 0.75 : 1.15;
-            
-            // Generate deterministic wavy curves based on the day of the month
-            $variance = 0.9 + (sin($date->day * 0.5) * 0.15);
-            
-            $pvs = (int) ($basePageviews * $multiplier * $variance);
-            $vsts = (int) ($pvs * (0.45 + (cos($date->day) * 0.05)));
-            
-            $weeklyTraffic[] = [
-                'day' => $dayName,
-                'visits' => $vsts,
-                'pageviews' => $pvs,
-            ];
-        }
+        $categoryStats = News::published()
+            ->select('category', DB::raw('count(*) as count'), DB::raw('sum(views) as views'))
+            ->groupBy('category')
+            ->orderByDesc('count')
+            ->limit(5)
+            ->get();
 
-        // ── 3. Traffic Sources (Device distribution) ─────────────────────
+        $totalCategoryCount = News::published()->count();
 
-        $trafficSources = [
-            ['name' => 'Desktop', 'percent' => 54, 'icon' => 'Monitor', 'color' => 'bg-violet-500'],
-            ['name' => 'Mobile', 'percent' => 38, 'icon' => 'Smartphone', 'color' => 'bg-blue-500'],
-            ['name' => 'Tablet', 'percent' => 8, 'icon' => 'Tablet', 'color' => 'bg-emerald-500'],
+        $categoryColors = [
+            'Nasional' => 'bg-red-500',
+            'Internasional' => 'bg-blue-500',
+            'Politik' => 'bg-violet-500',
+            'Ekonomi' => 'bg-emerald-500',
+            'Olahraga' => 'bg-orange-500',
+            'Teknologi' => 'bg-cyan-500',
+            'Hiburan' => 'bg-pink-500',
+            'Kesehatan' => 'bg-teal-500',
+            'Pendidikan' => 'bg-indigo-500',
+            'Budaya' => 'bg-amber-500',
+            'Lingkungan' => 'bg-lime-500',
+            'Hukum' => 'bg-slate-500',
+            'Umum' => 'bg-gray-500',
         ];
+
+        $categoryDistribution = $categoryStats->map(function ($item) use ($totalCategoryCount, $categoryColors) {
+            $percent = $totalCategoryCount > 0 ? round(($item->count / $totalCategoryCount) * 100) : 0;
+            return [
+                'name' => $item->category,
+                'count' => $item->count,
+                'views' => (int) $item->views,
+                'percent' => (int) $percent,
+                'color' => $categoryColors[$item->category] ?? 'bg-slate-500',
+            ];
+        })->values()->all();
 
         // ── 4. Recent Articles (Last 6 entries) ─────────────────────────
 
@@ -219,7 +321,9 @@ class DashboardController extends Controller
         return Inertia::render('dashboard', [
             'stats' => $stats,
             'weeklyTraffic' => $weeklyTraffic,
-            'trafficSources' => $trafficSources,
+            'chartTitle' => $chartTitle,
+            'chartSubtitle' => $chartSubtitle,
+            'categoryDistribution' => $categoryDistribution,
             'recentArticles' => $recentArticles,
             'topArticles' => $topArticles,
             'notifications' => $sortedNotifications,

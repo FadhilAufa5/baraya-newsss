@@ -25,7 +25,7 @@ export function HeroSection({ heroArticle, sideArticles }: HeroSectionProps) {
     return (
         <section className="grid grid-cols-1 gap-4 lg:grid-cols-3">
             {/* Hero Article */}
-            <a href={`/news/${heroArticle.id}`} className="lg:col-span-2 group relative overflow-hidden rounded-xl shadow-md cursor-pointer block">
+            <a href={`/news/${heroArticle.slug}`} className="lg:col-span-2 group relative overflow-hidden rounded-xl shadow-md cursor-pointer block">
                 <div className="aspect-[4/3] sm:aspect-video w-full">
                     {heroArticle.image ? (
                         <img
@@ -71,7 +71,7 @@ export function HeroSection({ heroArticle, sideArticles }: HeroSectionProps) {
             {/* Side Articles */}
             <div className="flex flex-col gap-3">
                 {sideArticles.map((art) => (
-                    <a key={art.id} href={`/news/${art.id}`} className="group flex gap-3 rounded-xl bg-white dark:bg-gray-800 shadow-sm overflow-hidden hover:shadow-md transition-shadow cursor-pointer">
+                    <a key={art.id} href={`/news/${art.slug}`} className="group flex gap-3 rounded-xl bg-white dark:bg-gray-800 shadow-sm overflow-hidden hover:shadow-md transition-shadow cursor-pointer">
                         <div className="w-24 shrink-0 sm:w-28">
                             {art.image ? (
                                 <img

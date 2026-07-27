@@ -4,8 +4,10 @@ import { Bell, Radio, Search, User, Video, Sun, Moon } from 'lucide-react';
 import { login, register, dashboard } from '@/routes';
 import { useAppearance } from '@/hooks/use-appearance';
 
+import AppLogoIcon from '@/components/app-logo-icon';
+
 export const CATEGORIES = [
-    'Home', 'Jawa Barat', 'Nasional', 'Ekonomi', 'Olahraga', 
+    'Home', 'Jawa Barat', 'Nasional', 'Ekonomi', 'Olahraga',
     'Teknologi', 'Lifestyle', 'Otomotif', 'Indeks'
 ];
 
@@ -24,8 +26,9 @@ export function Header({
     setSearchQuery,
     onSearchSubmit,
 }: HeaderProps) {
-    const { auth } = usePage<{ auth: { user: unknown } }>().props;
-    const { resolvedAppearance, updateAppearance } = useAppearance();
+    const { props: { auth } } = usePage<{ auth?: { user?: any } }>();
+    const { appearance, updateAppearance } = useAppearance();
+    const resolvedAppearance = appearance;
     const [mobileSearchOpen, setMobileSearchOpen] = React.useState(false);
 
     const toggleAppearance = () => {
@@ -33,16 +36,19 @@ export function Header({
     };
 
     return (
-        <header className="sticky top-0 z-50 w-full border-b border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-950">
+        <header className="sticky top-0 z-50 w-full border-b border-gray-200 bg-white shadow-xs dark:border-gray-700 dark:bg-gray-950">
             {/* Top bar */}
             <div className="mx-auto flex max-w-[1280px] items-center justify-between gap-4 px-4 py-3 sm:px-6">
                 {/* Logo */}
-                <Link href="/" className="shrink-0">
-                    <div className="flex items-baseline gap-0.5 leading-none">
-                        <span className="font-black text-2xl text-red-600 tracking-tight">baraya</span>
-                        <span className="font-black text-2xl text-gray-800 tracking-tight dark:text-white">news</span>
+                <Link href="/" className="shrink-0 flex items-center gap-2.5 group">
+                    <AppLogoIcon className="h-9 sm:h-10 w-auto transition-transform duration-300 group-hover:scale-105" />
+                    <div>
+                        <div className="flex items-baseline gap-0.5 leading-none">
+                            <span className="font-black text-2xl text-red-600 tracking-tight">baraya</span>
+                            <span className="font-black text-2xl text-gray-800 tracking-tight dark:text-white">news</span>
+                        </div>
+                        <div className="text-[9px] text-gray-400 font-medium tracking-widest uppercase">Portal Berita Terkini Jawa Barat</div>
                     </div>
-                    <div className="text-[9px] text-gray-400 font-medium tracking-widest uppercase">Portal Berita Terkini Jawa Barat</div>
                 </Link>
 
                 {/* Search */}
@@ -71,9 +77,9 @@ export function Header({
                     <Link href="/videos" className="hidden sm:flex items-center gap-1.5 rounded-full border border-gray-200 px-3 py-1.5 text-xs font-semibold text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-200 transition-colors">
                         <Video className="size-3.5" /> Video
                     </Link>
-                    
+
                     {/* Search button on mobile */}
-                    <button 
+                    <button
                         onClick={() => setMobileSearchOpen(!mobileSearchOpen)}
                         className="flex md:hidden size-9 items-center justify-center rounded-full border border-gray-200 text-gray-600 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-200"
                         aria-label="Cari berita"
@@ -81,10 +87,10 @@ export function Header({
                         <Search className="size-4" />
                     </button>
 
-                    <button className="relative size-9 flex items-center justify-center rounded-full border border-gray-200 text-gray-600 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-200">
+                    {/* <button className="relative size-9 flex items-center justify-center rounded-full border border-gray-200 text-gray-600 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-200">
                         <Bell className="size-4" />
                         <span className="absolute -right-0.5 -top-0.5 size-4 rounded-full bg-red-500 text-[9px] font-bold text-white flex items-center justify-center">3</span>
-                    </button>
+                    </button> */}
 
                     <button
                         onClick={toggleAppearance}
@@ -118,7 +124,7 @@ export function Header({
                                 href={login()}
                                 className="inline-flex items-center rounded-full bg-red-600 px-4 py-2 text-xs font-bold text-white hover:bg-red-700 transition-colors shadow-sm"
                             >
-                             <User className="size-3.5 mr-1" />Masuk
+                                <User className="size-3.5 mr-1" />Masuk
                             </Link>
                         </div>
                     )}
@@ -152,11 +158,10 @@ export function Header({
                             <li key={cat}>
                                 <button
                                     onClick={() => setActiveCategory(cat)}
-                                    className={`relative px-3 py-3 text-xs font-bold uppercase tracking-wide transition-colors ${
-                                        activeCategory === cat
+                                    className={`relative px-3 py-3 text-xs font-bold uppercase tracking-wide transition-colors ${activeCategory === cat
                                             ? 'text-white after:absolute after:bottom-0 after:left-0 after:right-0 after:h-0.5 after:bg-red-500'
                                             : 'text-gray-400 hover:text-white'
-                                    }`}
+                                        }`}
                                 >
                                     {cat}
                                 </button>
