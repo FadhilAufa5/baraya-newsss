@@ -34,7 +34,7 @@ class ShortVideoController extends Controller
 
     public function publicIndex(Request $request)
     {
-        $query = ShortVideo::with('user')
+        $query = ShortVideo::with(['user', 'comments.user'])
             ->where('status', 'published')
             ->latest('published_at');
 

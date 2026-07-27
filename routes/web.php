@@ -43,6 +43,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('short-videos/create', [ShortVideoController::class, 'create'])->name('short-videos.create');
     Route::post('short-videos', [ShortVideoController::class, 'store'])->name('short-videos.store');
     Route::delete('short-videos/{shortVideo}', [ShortVideoController::class, 'destroy'])->name('short-videos.destroy');
+    Route::post('short-videos/{shortVideo}/comments', [CommentController::class, 'storeShortVideo'])->name('short-videos.comments.store');
 
     // iklan Management
     Route::get('iklan', [AdController::class, 'index'])->name('iklan.index');

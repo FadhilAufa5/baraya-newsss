@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Comment;
 use App\Models\News;
+use App\Models\ShortVideo;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -12,7 +13,7 @@ class CommentController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Comment::with(['user', 'news'])
+        $query = Comment::with(['user', 'news', 'shortVideo'])
             ->latest();
 
         if ($request->filled('search')) {
@@ -20,7 +21,8 @@ class CommentController extends Controller
             $query->where(function ($q) use ($search) {
                 $q->where('body', 'like', "%{$search}%")
                     ->orWhereHas('user', fn ($q) => $q->where('name', 'like', "%{$search}%"))
-                    ->orWhereHas('news', fn ($q) => $q->where('title', 'like', "%{$search}%"));
+                    ->orWhereHas('news', fn ($q) => $q->where('title', 'like', "%{$search}%"))
+                    ->orWhereHas('shortVideo', fn ($q) => $q->where('title', 'like', "%{$search}%"));
             });
         }
 
@@ -48,6 +50,26 @@ class CommentController extends Controller
         ]);
 
         $news->comments()->create([
+            'user_id' => $request->user()->id,
+            'body'    => $validated['body'],
+        ]);
+
+        Inertia::flash('toast', ['type' => 'success', 'message' => 'Komentar berhasil ditambahkan.']);
+
+        return back();
+    }
+
+    public function storeShortVideo(Request $request, ShortVideo $shortVideo): RedirectResponse
+    {
+        $validated = $request->validate([
+            'body' => ['required', 'string', 'min:3', 'max:1000'],
+        ], [
+            'body.required' => 'Komentar wajib diisi.',
+            'body.min'      => 'Komentar minimal 3 karakter.',
+            'body.max'      => 'Komentar maksimal 1000 karakter.',
+        ]);
+
+        $shortVideo->comments()->create([
             'user_id' => $request->user()->id,
             'body'    => $validated['body'],
         ]);

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Head } from '@inertiajs/react';
+import { Head, router } from '@inertiajs/react';
 import { dashboard } from '@/routes';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -26,6 +26,7 @@ import {
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Button } from '@/components/ui/button';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 
 
@@ -88,6 +89,7 @@ interface DashboardProps {
     recentArticles: Article[];
     topArticles: { title: string; views: number; trend: number }[];
     notifications: NotificationItem[];
+    filters: { period: string };
 }
 
 const sourceIconMap: Record<string, React.ElementType> = {
@@ -206,6 +208,7 @@ export default function Dashboard({
     recentArticles,
     topArticles,
     notifications: initialNotifications,
+    filters,
 }: DashboardProps) {
     const [notifications, setNotifications] = useState<NotificationItem[]>(initialNotifications);
 
@@ -286,7 +289,24 @@ export default function Dashboard({
                         </p>
                     </div>
 
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-3">
+                        <Select
+                            value={filters.period}
+                            onValueChange={(value) => {
+                                router.get(dashboard(), { period: value }, { preserveState: true });
+                            }}
+                        >
+                            <SelectTrigger className="w-[145px] h-10 rounded-xl">
+                                <SelectValue placeholder="Pilih Waktu" />
+                            </SelectTrigger>
+                            <SelectContent className="rounded-xl">
+                                <SelectItem value="all">Semua Waktu</SelectItem>
+                                <SelectItem value="year">Tahun Ini</SelectItem>
+                                <SelectItem value="month">30 Hari Terakhir</SelectItem>
+                                <SelectItem value="week">7 Hari Terakhir</SelectItem>
+                            </SelectContent>
+                        </Select>
+
                         <Popover>
                             <PopoverTrigger asChild>
                                 <Button

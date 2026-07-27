@@ -97,6 +97,7 @@ export default function PublicShortVideos({ videos, filters }: Props) {
                     onClose={() => setActiveVideo(null)}
                     onPrev={handlePrev}
                     onNext={handleNext}
+                    auth={auth}
                 />
             )}
 

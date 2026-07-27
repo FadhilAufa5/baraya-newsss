@@ -12,6 +12,7 @@ class Comment extends Model
 
     protected $fillable = [
         'news_id',
+        'short_video_id',
         'user_id',
         'body',
         'parent_id',
@@ -20,6 +21,11 @@ class Comment extends Model
     public function news(): BelongsTo
     {
         return $this->belongsTo(News::class);
+    }
+
+    public function shortVideo(): BelongsTo
+    {
+        return $this->belongsTo(ShortVideo::class);
     }
 
     public function user(): BelongsTo

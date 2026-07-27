@@ -16,44 +16,69 @@ class DashboardController extends Controller
     {
         // ── 1. Statistics Cards ──────────────────────────────────────────
 
+        $period = $request->query('period', 'week'); // 'week', 'month', 'year', 'all'
+        
+        if ($period === 'month') {
+            $currentPeriodStart = now()->subDays(30);
+            $previousPeriodStart = now()->subDays(60);
+            $previousPeriodEnd = now()->subDays(30);
+        } elseif ($period === 'year') {
+            $currentPeriodStart = now()->subDays(365);
+            $previousPeriodStart = now()->subDays(730);
+            $previousPeriodEnd = now()->subDays(365);
+        } elseif ($period === 'all') {
+            $currentPeriodStart = now()->subYears(100);
+            $previousPeriodStart = now()->subYears(200);
+            $previousPeriodEnd = now()->subYears(100);
+        } else {
+            // Default to week
+            $currentPeriodStart = now()->subDays(7);
+            $previousPeriodStart = now()->subDays(14);
+            $previousPeriodEnd = now()->subDays(7);
+        }
+
         // Total News (Articles)
-        $totalNews = News::count();
-        $newsLast7Days = News::where('created_at', '>', now()->subDays(7))->count();
-        $newsPrev7Days = News::whereBetween('created_at', [now()->subDays(14), now()->subDays(7)])->count();
+        $totalNews = News::where('created_at', '>=', $currentPeriodStart)->count();
+        $newsPrevPeriod = News::whereBetween('created_at', [$previousPeriodStart, $previousPeriodEnd])->count();
         $newsChange = 0.0;
-        if ($newsPrev7Days > 0) {
-            $newsChange = round((($newsLast7Days - $newsPrev7Days) / $newsPrev7Days) * 100, 1);
-        } elseif ($newsLast7Days > 0) {
+        if ($newsPrevPeriod > 0) {
+            $newsChange = round((($totalNews - $newsPrevPeriod) / $newsPrevPeriod) * 100, 1);
+        } elseif ($totalNews > 0) {
             $newsChange = 100.0;
         }
 
         // Pageviews (Views of published articles & videos)
-        $newsViews = News::published()->sum('views');
-        $videoViews = ShortVideo::where('status', 'published')->sum('views');
+        if ($period === 'all') {
+            $newsViews = News::published()->sum('views');
+            $videoViews = ShortVideo::where('status', 'published')->sum('views');
+        } else {
+            $newsViews = News::published()->where('created_at', '>=', $currentPeriodStart)->sum('views');
+            $videoViews = ShortVideo::where('status', 'published')->where('created_at', '>=', $currentPeriodStart)->sum('views');
+        }
         $pageviews = (int) ($newsViews + $videoViews);
 
-        // Pageviews Change (using news views from last 7 days vs previous 7 days as proxy)
-        $viewsLast7Days = News::where('created_at', '>', now()->subDays(7))->sum('views');
-        $viewsPrev7Days = News::whereBetween('created_at', [now()->subDays(14), now()->subDays(7)])->sum('views');
+        // Pageviews Change
+        $viewsPrevPeriod = News::published()->whereBetween('created_at', [$previousPeriodStart, $previousPeriodEnd])->sum('views') 
+                         + ShortVideo::where('status', 'published')->whereBetween('created_at', [$previousPeriodStart, $previousPeriodEnd])->sum('views');
+        
         $viewsChange = 0.0;
-        if ($viewsPrev7Days > 0) {
-            $viewsChange = round((($viewsLast7Days - $viewsPrev7Days) / $viewsPrev7Days) * 100, 1);
-        } elseif ($viewsLast7Days > 0) {
+        if ($viewsPrevPeriod > 0) {
+            $viewsChange = round((($pageviews - $viewsPrevPeriod) / $viewsPrevPeriod) * 100, 1);
+        } elseif ($pageviews > 0) {
             $viewsChange = 100.0;
         }
 
-        // Unique Visitors (Est. 76% of pageviews, with slight difference in change rate)
+        // Unique Visitors (Est. 76% of pageviews)
         $uniqueVisitors = (int) round($pageviews * 0.76);
         $visitorsChange = round($viewsChange * 0.95, 1);
 
         // Total Comments
-        $totalComments = Comment::count();
-        $commentsLast7Days = Comment::where('created_at', '>', now()->subDays(7))->count();
-        $commentsPrev7Days = Comment::whereBetween('created_at', [now()->subDays(14), now()->subDays(7)])->count();
+        $totalComments = Comment::where('created_at', '>=', $currentPeriodStart)->count();
+        $commentsPrevPeriod = Comment::whereBetween('created_at', [$previousPeriodStart, $previousPeriodEnd])->count();
         $commentsChange = 0.0;
-        if ($commentsPrev7Days > 0) {
-            $commentsChange = round((($commentsLast7Days - $commentsPrev7Days) / $commentsPrev7Days) * 100, 1);
-        } elseif ($commentsLast7Days > 0) {
+        if ($commentsPrevPeriod > 0) {
+            $commentsChange = round((($totalComments - $commentsPrevPeriod) / $commentsPrevPeriod) * 100, 1);
+        } elseif ($totalComments > 0) {
             $commentsChange = 100.0;
         }
 
@@ -198,6 +223,7 @@ class DashboardController extends Controller
             'recentArticles' => $recentArticles,
             'topArticles' => $topArticles,
             'notifications' => $sortedNotifications,
+            'filters' => ['period' => $period],
         ]);
     }
 }

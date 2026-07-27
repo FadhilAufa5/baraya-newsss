@@ -40,6 +40,7 @@ interface Comment {
     created_at: string;
     user: { id: number; name: string; email: string } | null;
     news: { id: number; title: string; slug: string } | null;
+    short_video: { id: number; title: string; } | null;
 }
 
 interface PaginatedData {
@@ -353,7 +354,7 @@ export default function CommentsIndex({ comments, filters, stats }: Props) {
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
                             onKeyDown={(e) => e.key === 'Enter' && applyFilter()}
-                            placeholder="Cari komentar, nama, atau judul berita..."
+                            placeholder="Cari komentar, nama, atau judul berita/video..."
                             className="rounded-xl pl-10 pr-4"
                         />
                     </div>
@@ -480,7 +481,7 @@ export default function CommentsIndex({ comments, filters, stats }: Props) {
                                                 </div>
                                             </TableCell>
 
-                                            {/* News */}
+                                            {/* News or Video */}
                                             <TableCell className="py-4">
                                                 {comment.news ? (
                                                     <div className="flex items-start gap-2">
@@ -489,6 +490,15 @@ export default function CommentsIndex({ comments, filters, stats }: Props) {
                                                         </div>
                                                         <span className="line-clamp-2 text-xs leading-snug text-muted-foreground">
                                                             {comment.news.title}
+                                                        </span>
+                                                    </div>
+                                                ) : comment.short_video ? (
+                                                    <div className="flex items-start gap-2">
+                                                        <div className="mt-0.5 flex size-5 shrink-0 items-center justify-center rounded bg-slate-100 dark:bg-slate-800">
+                                                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-slate-500"><polygon points="23 7 16 12 23 17 23 7"></polygon><rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect></svg>
+                                                        </div>
+                                                        <span className="line-clamp-2 text-xs leading-snug text-muted-foreground">
+                                                            {comment.short_video.title}
                                                         </span>
                                                     </div>
                                                 ) : (
