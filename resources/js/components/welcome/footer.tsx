@@ -15,10 +15,11 @@ export function Footer({ user }: FooterProps) {
                     {/* Brand */}
                     <div>
                         <div className="flex items-baseline gap-0.5 mb-1">
-                            <span className="font-black text-2xl text-red-500 tracking-tight">baraya</span>
-                            <span className="font-black text-2xl text-white tracking-tight">news</span>
+                            <span className="font-black text-2xl text-red-500 tracking-tight">Kreasi</span>
+                            <span className="font-black text-2xl text-white tracking-tight">Baraya</span>
+                            <span className="font-black text-2xl text-white tracking-tight">Mandiri</span>
                         </div>
-                        <p className="text-xs text-gray-400 leading-relaxed">Portal berita terkini, terpercaya, dan terlengkap dari Jawa Barat untuk Indonesia.</p>
+                        <p className="text-xs text-gray-400 leading-relaxed">PT. Kreasi Baraya Mandiri adalah sebuah perusahaan yang bergerak di bidang media yang menaungi website portal berita barayanews.co.id untuk menayangkan berita terkini dan terpercaya.</p>
                     </div>
                     {/* Kategori */}
                     <div>

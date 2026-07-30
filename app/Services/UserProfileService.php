@@ -2,13 +2,17 @@
 
 namespace App\Services;
 
+use App\Models\Media;
 use App\Models\User;
 use App\Models\UserProfile;
 use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Facades\Storage;
 
 class UserProfileService
 {
+    public function __construct(
+        private readonly MediaService $mediaService,
+    ) {}
+
     /**
      * Update a user's extra profile data (bio, website, social links).
      */
@@ -28,39 +32,35 @@ class UserProfileService
     }
 
     /**
-     * Upload and replace the user's avatar image.
-     * Returns the public storage path of the new avatar.
+     * Upload and replace the user's avatar image via the Media pipeline.
+     * Returns the Media record.
      */
-    public function uploadAvatar(User $user, UploadedFile $file): string
+    public function uploadAvatar(User $user, UploadedFile $file): Media
     {
         $profile = $user->profile()->firstOrCreate(['user_id' => $user->id]);
 
-        if ($profile->avatar) {
-            Storage::disk('public')->delete($profile->avatar);
-        }
-
-        $path = $file->store('avatars', 'public');
-        $profile->update(['avatar' => $path]);
-
-        return $path;
+        return $this->mediaService->replaceForModel(
+            $profile,
+            Media::COLLECTION_AVATAR,
+            $file,
+            $user->id,
+        );
     }
 
     /**
-     * Upload and replace the user's cover (header) image.
-     * Returns the public storage path of the new cover image.
+     * Upload and replace the user's cover (header) image via the Media pipeline.
+     * Returns the Media record.
      */
-    public function uploadCover(User $user, UploadedFile $file): string
+    public function uploadCover(User $user, UploadedFile $file): Media
     {
         $profile = $user->profile()->firstOrCreate(['user_id' => $user->id]);
 
-        if ($profile->cover_image) {
-            Storage::disk('public')->delete($profile->cover_image);
-        }
-
-        $path = $file->store('covers', 'public');
-        $profile->update(['cover_image' => $path]);
-
-        return $path;
+        return $this->mediaService->replaceForModel(
+            $profile,
+            Media::COLLECTION_COVER,
+            $file,
+            $user->id,
+        );
     }
 
     /**

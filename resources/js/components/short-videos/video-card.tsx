@@ -71,7 +71,7 @@ export function VideoCard({ video, onSelect, featured = false }: VideoCardProps)
             {/* Thumbnail */}
             {video.thumbnail ? (
                 <img
-                    src={mediaUrl(video.thumbnail)}
+                    src={mediaUrl(video.thumbnail) ?? undefined}
                     alt={video.title}
                     onLoad={() => setLoaded(true)}
                     className={`absolute inset-0 h-full w-full object-cover transition-all duration-500 ${hovered ? 'opacity-0 scale-105' : 'opacity-100 scale-100'}`}
@@ -83,7 +83,7 @@ export function VideoCard({ video, onSelect, featured = false }: VideoCardProps)
             {/* Video Preview */}
             <video
                 ref={ref}
-                src={mediaUrl(video.video)}
+                src={mediaUrl(video.video) ?? undefined}
                 muted
                 playsInline
                 loop

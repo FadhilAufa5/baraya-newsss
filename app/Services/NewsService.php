@@ -2,30 +2,47 @@
 
 namespace App\Services;
 
+use App\Models\Media;
 use App\Models\News;
 use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Facades\Storage;
 
 class NewsService
 {
+    public function __construct(
+        private readonly MediaService $mediaService,
+    ) {}
+
     /**
      * Prepare and persist a new article from validated request data.
      * Handles slug generation, reading-time estimation, auto-excerpt,
-     * auto-published_at, and file uploads.
+     * auto-published_at, and file uploads via the Media pipeline.
      */
     public function store(array $data, ?UploadedFile $image = null, ?UploadedFile $video = null): News
     {
         $data = $this->prepareData($data);
 
+        $news = News::create($data);
+
+        // Upload through the media pipeline (temp → queue → final)
         if ($image) {
-            $data['image'] = $image->store('news', 'public');
+            $this->mediaService->upload(
+                $image,
+                Media::COLLECTION_NEWS_IMAGE,
+                $news,
+                $data['user_id'] ?? null,
+            );
         }
 
         if ($video) {
-            $data['short_video'] = $video->store('news/videos', 'public');
+            $this->mediaService->upload(
+                $video,
+                Media::COLLECTION_NEWS_VIDEO,
+                $news,
+                $data['user_id'] ?? null,
+            );
         }
 
-        return News::create($data);
+        return $news;
     }
 
     /**
@@ -39,10 +56,16 @@ class NewsService
 
         // Handle image: upload new, remove, or keep existing
         if ($image) {
-            $this->deleteFile($news->image);
-            $data['image'] = $image->store('news', 'public');
+            $this->mediaService->replaceForModel(
+                $news,
+                Media::COLLECTION_NEWS_IMAGE,
+                $image,
+                auth()->id(),
+            );
+            // Legacy field will be synced by the job
+            unset($data['image']);
         } elseif (!empty($data['remove_image'])) {
-            $this->deleteFile($news->image);
+            $this->mediaService->clearCollection($news, Media::COLLECTION_NEWS_IMAGE);
             $data['image'] = null;
         } else {
             unset($data['image']);
@@ -50,10 +73,15 @@ class NewsService
 
         // Handle short video: upload new, remove, or keep existing
         if ($video) {
-            $this->deleteFile($news->short_video);
-            $data['short_video'] = $video->store('news/videos', 'public');
+            $this->mediaService->replaceForModel(
+                $news,
+                Media::COLLECTION_NEWS_VIDEO,
+                $video,
+                auth()->id(),
+            );
+            unset($data['short_video']);
         } elseif (!empty($data['remove_short_video'])) {
-            $this->deleteFile($news->short_video);
+            $this->mediaService->clearCollection($news, Media::COLLECTION_NEWS_VIDEO);
             $data['short_video'] = null;
         } else {
             unset($data['short_video']);
@@ -71,21 +99,17 @@ class NewsService
      */
     public function delete(News $news): void
     {
-        $this->deleteFile($news->image);
-        $this->deleteFile($news->short_video);
+        $this->mediaService->deleteAllForModel($news);
+
+        $disk = \Illuminate\Support\Facades\Storage::disk(config('media.final_disk', 'public'));
+        if ($news->image && $disk->exists($news->image)) {
+            $disk->delete($news->image);
+        }
+        if ($news->short_video && $disk->exists($news->short_video)) {
+            $disk->delete($news->short_video);
+        }
 
         $news->delete();
-    }
-
-    /**
-     * Safely delete a file from the public disk.
-     * Skips legacy base64 data URLs and non-existent paths.
-     */
-    private function deleteFile(?string $path): void
-    {
-        if ($path) {
-            Storage::disk('public')->delete($path);
-        }
     }
 
     /**

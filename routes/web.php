@@ -13,6 +13,7 @@ use App\Http\Controllers\CommentActionController;
 use App\Http\Controllers\OAuthController;
 use App\Http\Controllers\UserProfileController;
 use App\Http\Controllers\EmailController;
+use App\Http\Controllers\GalleryController;
 use Illuminate\Support\Facades\Route;
 
 // ── Public routes ─────────────────────────────────────────────────────────────
@@ -45,6 +46,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('short-videos', [ShortVideoController::class, 'store'])->name('short-videos.store');
     Route::delete('short-videos/{shortVideo}', [ShortVideoController::class, 'destroy'])->name('short-videos.destroy');
     Route::post('short-videos/{shortVideo}/comments', [CommentController::class, 'storeShortVideo'])->name('short-videos.comments.store');
+
+    // Short Video views
+    Route::post('short-videos/{shortVideo}/views', [ShortVideoController::class, 'incrementViews'])->name('short-videos.views');
+
+    // Gallery
+    Route::get('gallery', [GalleryController::class, 'index'])->name('gallery.index');
 
     // iklan Management
     Route::get('iklan', [AdController::class, 'index'])->name('iklan.index');

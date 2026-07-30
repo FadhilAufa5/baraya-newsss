@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Concerns\HasMedia;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -10,7 +11,7 @@ use Illuminate\Support\Str;
 
 class News extends Model
 {
-    use HasFactory;
+    use HasFactory, HasMedia;
 
     /**
      * Use slug for route model binding instead of id.

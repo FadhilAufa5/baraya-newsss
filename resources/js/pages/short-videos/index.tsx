@@ -286,8 +286,8 @@ export default function ShortVideoIndex({ shortVideos, filters }: Props) {
                                 <Card key={item.id} className="group overflow-hidden transition-shadow hover:shadow-lg">
                                     <div className="relative bg-black">
                                         <video
-                                            src={mediaUrl(item.video)}
-                                            poster={item.thumbnail ? mediaUrl(item.thumbnail) : undefined}
+                                            src={mediaUrl(item.video) ?? undefined}
+                                            poster={item.thumbnail ? (mediaUrl(item.thumbnail) ?? undefined) : undefined}
                                             controls
                                             playsInline
                                             className="aspect-video max-h-[420px] w-full object-contain"

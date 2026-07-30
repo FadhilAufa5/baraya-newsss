@@ -2,14 +2,19 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Media;
 use App\Models\ShortVideo;
+use App\Services\MediaService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 
 class ShortVideoController extends Controller
 {
+    public function __construct(
+        private readonly MediaService $mediaService,
+    ) {}
+
     public function index(Request $request)
     {
         $query = ShortVideo::with('user')->latest('created_at');
@@ -76,30 +81,50 @@ class ShortVideoController extends Controller
         ]);
 
         $data['user_id'] = $request->user()->id;
-        $data['video'] = $request->file('video')->store('short-videos', 'public');
-
-        if ($request->hasFile('thumbnail')) {
-            $data['thumbnail'] = $request->file('thumbnail')->store('short-videos/thumbnails', 'public');
-        }
 
         if ($data['status'] === 'published' && empty($data['published_at'])) {
             $data['published_at'] = now();
         }
 
-        ShortVideo::create($data);
+        // Extract files before creating model record
+        unset($data['video'], $data['thumbnail']);
+        $data['video'] = null;
+        $data['thumbnail'] = null;
+
+        $shortVideo = ShortVideo::create($data);
+
+        // Upload video via media pipeline
+        $this->mediaService->upload(
+            $request->file('video'),
+            Media::COLLECTION_SHORT_VIDEO,
+            $shortVideo,
+            $request->user()->id,
+        );
+
+        // Upload thumbnail if provided
+        if ($request->hasFile('thumbnail')) {
+            $this->mediaService->upload(
+                $request->file('thumbnail'),
+                Media::COLLECTION_SHORT_VIDEO_THUMBNAIL,
+                $shortVideo,
+                $request->user()->id,
+            );
+        }
 
         Inertia::flash('toast', ['type' => 'success', 'message' => 'Short video berhasil diunggah.']);
 
         return to_route('short-videos.index');
     }
 
+    public function incrementViews(ShortVideo $shortVideo): void
+    {
+        $shortVideo->increment('views');
+    }
+
     public function destroy(ShortVideo $shortVideo): RedirectResponse
     {
-        Storage::disk('public')->delete($shortVideo->video);
-
-        if ($shortVideo->thumbnail) {
-            Storage::disk('public')->delete($shortVideo->thumbnail);
-        }
+        // Delete all media (video + thumbnail) through the media pipeline
+        $this->mediaService->deleteAllForModel($shortVideo);
 
         $shortVideo->delete();
 

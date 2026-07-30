@@ -149,14 +149,14 @@ export default function PublicShortVideos({ videos, filters }: Props) {
                             {/* Right: Stats & Desktop Search */}
                             <div className="flex flex-col gap-3 sm:items-end">
                                 <div className="flex items-center gap-3">
-                                    <div className="rounded-2xl bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/8 px-4 py-2.5 text-center">
+                                    {/* <div className="rounded-2xl bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/8 px-4 py-2.5 text-center">
                                         <div className="text-xl font-black text-gray-800 dark:text-white">{videos.total}</div>
                                         <div className="text-[9px] uppercase tracking-widest text-gray-400 dark:text-gray-400 font-bold">Total Video</div>
                                     </div>
                                     <div className="rounded-2xl bg-red-50 dark:bg-red-600/15 border border-red-200 dark:border-red-600/25 px-4 py-2.5 text-center">
                                         <div className="text-xl font-black text-red-600 dark:text-red-400">{formatViews(totalViews)}</div>
                                         <div className="text-[9px] uppercase tracking-widest text-red-500/70 dark:text-red-400/70 font-bold">Total Views</div>
-                                    </div>
+                                    </div> */}
                                 </div>
 
                                 {/* Desktop search */}
@@ -277,13 +277,13 @@ export default function PublicShortVideos({ videos, filters }: Props) {
                                     <span className="text-xs font-black uppercase tracking-wider text-gray-800 dark:text-white">
                                         {filters.search ? `Hasil: "${filters.search}"` : `Semua Video Shorts`}
                                     </span>
-                                    <span className="rounded-full bg-red-100 dark:bg-red-600/20 border border-red-200 dark:border-red-600/30 px-2 py-0.5 text-[9px] font-black text-red-600 dark:text-red-400">
+                                    {/* <span className="rounded-full bg-red-100 dark:bg-red-600/20 border border-red-200 dark:border-red-600/30 px-2 py-0.5 text-[9px] font-black text-red-600 dark:text-red-400">
                                         {videos.total}
-                                    </span>
+                                    </span> */}
                                 </div>
-                                <span className="text-[10px] font-semibold text-gray-400">
+                                {/* <span className="text-[10px] font-semibold text-gray-400">
                                     Menampilkan {videos.data.length} dari {videos.total} video
-                                </span>
+                                </span> */}
                             </div>
 
                             {/* Active filter badge */}
