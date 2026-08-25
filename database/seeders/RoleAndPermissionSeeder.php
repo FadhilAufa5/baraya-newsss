@@ -23,6 +23,10 @@ class RoleAndPermissionSeeder extends Seeder
             'delete news',
             'publish news',
             'view news',
+            'manage short videos',
+            'manage iklan',
+            'manage comments',
+            'access dashboard',
         ];
 
         foreach ($permissions as $permission) {
@@ -40,6 +44,9 @@ class RoleAndPermissionSeeder extends Seeder
             'delete news',
             'publish news',
             'view news',
+            'manage short videos',
+            'manage comments',
+            'access dashboard',
         ]);
 
         $writer = Role::firstOrCreate(['name' => 'Writer']);
@@ -47,6 +54,8 @@ class RoleAndPermissionSeeder extends Seeder
             'create news',
             'edit news',
             'view news',
+            'manage short videos',
+            'access dashboard',
         ]);
 
         $subscriber = Role::firstOrCreate(['name' => 'Subscriber']);

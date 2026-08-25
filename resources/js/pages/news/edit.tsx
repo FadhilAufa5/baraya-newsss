@@ -4,6 +4,7 @@ import { imageUrl } from '@/lib/utils';
 import {
     ArrowLeft,
     Film,
+    Loader2,
     Upload,
     X,
     Tag,
@@ -427,49 +428,62 @@ export default function EditNews({ article, categories }: Props) {
                                 </CardTitle>
                             </CardHeader>
                             <CardContent className="flex flex-col gap-3">
-                                {imagePreview ? (
-                                    <div className="relative overflow-hidden rounded-xl border">
-                                        <img
-                                            src={imagePreview}
-                                            alt="Preview"
-                                            className="h-56 w-full object-cover"
-                                        />
+                                <div className="relative">
+                                    {imagePreview ? (
+                                        <div className="relative overflow-hidden rounded-xl border">
+                                            <img
+                                                src={imagePreview}
+                                                alt="Preview"
+                                                className="h-56 w-full object-cover"
+                                            />
+                                            <button
+                                                type="button"
+                                                onClick={removeImage}
+                                                disabled={processing}
+                                                className="absolute top-2 right-2 flex size-8 items-center justify-center rounded-full bg-black/60 text-white hover:bg-black/80 disabled:opacity-50"
+                                            >
+                                                <X className="size-4" />
+                                            </button>
+                                            {article.image && !data.image && (
+                                                <span className="absolute bottom-2 left-2 rounded-full bg-black/60 px-2 py-0.5 text-xs text-white">
+                                                    Gambar saat ini
+                                                </span>
+                                            )}
+                                        </div>
+                                    ) : (
                                         <button
                                             type="button"
-                                            onClick={removeImage}
-                                            className="absolute top-2 right-2 flex size-8 items-center justify-center rounded-full bg-black/60 text-white hover:bg-black/80"
+                                            onClick={() => fileRef.current?.click()}
+                                            disabled={processing}
+                                            className="flex h-44 w-full flex-col items-center justify-center gap-3 rounded-xl border-2 border-dashed border-muted-foreground/25 bg-muted/20 text-muted-foreground transition-colors hover:border-primary/40 hover:bg-muted/40 hover:text-foreground disabled:opacity-60 disabled:cursor-not-allowed"
                                         >
-                                            <X className="size-4" />
+                                            <Upload className="size-8 opacity-50" />
+                                            <div className="text-center">
+                                                <p className="text-sm font-medium">
+                                                    Klik untuk upload gambar baru
+                                                </p>
+                                                <p className="text-xs">
+                                                    JPG, PNG, WebP — maks 4MB
+                                                </p>
+                                            </div>
                                         </button>
-                                        {article.image && !data.image && (
-                                            <span className="absolute bottom-2 left-2 rounded-full bg-black/60 px-2 py-0.5 text-xs text-white">
-                                                Gambar saat ini
-                                            </span>
-                                        )}
-                                    </div>
-                                ) : (
-                                    <button
-                                        type="button"
-                                        onClick={() => fileRef.current?.click()}
-                                        className="flex h-44 w-full flex-col items-center justify-center gap-3 rounded-xl border-2 border-dashed border-muted-foreground/25 bg-muted/20 text-muted-foreground transition-colors hover:border-primary/40 hover:bg-muted/40 hover:text-foreground"
-                                    >
-                                        <Upload className="size-8 opacity-50" />
-                                        <div className="text-center">
-                                            <p className="text-sm font-medium">
-                                                Klik untuk upload gambar baru
-                                            </p>
-                                            <p className="text-xs">
-                                                JPG, PNG, WebP — maks 4MB
-                                            </p>
+                                    )}
+                                    {processing && (
+                                        <div className="absolute inset-0 z-10 flex items-center justify-center rounded-xl bg-black/40 backdrop-blur-sm">
+                                            <div className="flex flex-col items-center gap-2">
+                                                <Loader2 className="size-8 animate-spin text-white" />
+                                                <span className="text-xs font-semibold text-white drop-shadow-lg">Mengunggah...</span>
+                                            </div>
                                         </div>
-                                    </button>
-                                )}
+                                    )}
+                                </div>
                                 <input
                                     ref={fileRef}
                                     type="file"
                                     accept="image/*"
                                     className="hidden"
                                     onChange={handleImageChange}
+                                    disabled={processing}
                                 />
                                 {imagePreview && (
                                     <Button
@@ -477,9 +491,10 @@ export default function EditNews({ article, categories }: Props) {
                                         variant="outline"
                                         size="sm"
                                         onClick={() => fileRef.current?.click()}
+                                        disabled={processing}
                                         className="gap-2"
                                     >
-                                        <Upload className="size-3.5" />
+                                        {processing ? <Loader2 className="size-3.5 animate-spin" /> : <Upload className="size-3.5" />}
                                         Ganti Gambar
                                     </Button>
                                 )}
@@ -497,6 +512,7 @@ export default function EditNews({ article, categories }: Props) {
                                             )
                                         }
                                         placeholder="Sumber / deskripsi gambar..."
+                                        disabled={processing}
                                     />
                                 </div>
                                 <InputError message={errors.image} />

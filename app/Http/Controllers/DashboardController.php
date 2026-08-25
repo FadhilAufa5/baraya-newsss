@@ -8,6 +8,7 @@ use App\Models\ShortVideo;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -15,6 +16,8 @@ class DashboardController extends Controller
 {
     public function index(Request $request): Response
     {
+        Gate::authorize('access dashboard');
+
         // ── 1. Statistics Cards (Real DB Logic) ──────────────────────────
 
         $period = $request->query('period', 'week'); // 'week', 'month', 'year', 'all'

@@ -5,12 +5,15 @@ namespace App\Http\Controllers;
 use App\Models\News;
 use App\Models\ShortVideo;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 use Inertia\Inertia;
 
 class GalleryController extends Controller
 {
     public function index(Request $request)
     {
+        Gate::authorize('access dashboard');
+
         $type = $request->query('type', 'all');
 
         $mediaItems = collect();
@@ -122,5 +125,54 @@ class GalleryController extends Controller
             ],
             'type' => $type,
         ]);
+    }
+
+    public function destroy(string $id)
+    {
+        Gate::authorize('access dashboard');
+
+        $disk = \Illuminate\Support\Facades\Storage::disk(config('media.final_disk', 'public'));
+
+        if (str_starts_with($id, 'news_img_')) {
+            $modelId = str_replace('news_img_', '', $id);
+            $news = News::find($modelId);
+            if ($news) {
+                if ($news->image && $disk->exists($news->image)) {
+                    $disk->delete($news->image);
+                }
+                $news->update(['image' => null]);
+            }
+        } elseif (str_starts_with($id, 'news_vid_')) {
+            $modelId = str_replace('news_vid_', '', $id);
+            $news = News::find($modelId);
+            if ($news) {
+                if ($news->short_video && $disk->exists($news->short_video)) {
+                    $disk->delete($news->short_video);
+                }
+                $news->update(['short_video' => null]);
+            }
+        } elseif (str_starts_with($id, 'thumb_')) {
+            $modelId = str_replace('thumb_', '', $id);
+            $sv = ShortVideo::find($modelId);
+            if ($sv) {
+                if ($sv->thumbnail && $disk->exists($sv->thumbnail)) {
+                    $disk->delete($sv->thumbnail);
+                }
+                $sv->update(['thumbnail' => null]);
+            }
+        } elseif (str_starts_with($id, 'sv_vid_')) {
+            $modelId = str_replace('sv_vid_', '', $id);
+            $sv = ShortVideo::find($modelId);
+            if ($sv) {
+                if ($sv->video && $disk->exists($sv->video)) {
+                    $disk->delete($sv->video);
+                }
+                $sv->update(['video' => null]);
+            }
+        }
+
+        Inertia::flash('toast', ['type' => 'success', 'message' => 'Media berhasil dihapus.']);
+
+        return back();
     }
 }

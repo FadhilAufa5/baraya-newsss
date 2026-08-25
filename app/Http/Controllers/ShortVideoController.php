@@ -7,6 +7,7 @@ use App\Models\ShortVideo;
 use App\Services\MediaService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 use Inertia\Inertia;
 
 class ShortVideoController extends Controller
@@ -17,6 +18,8 @@ class ShortVideoController extends Controller
 
     public function index(Request $request)
     {
+        Gate::authorize('manage short videos');
+
         $query = ShortVideo::with('user')->latest('created_at');
 
         if ($request->filled('search')) {
@@ -59,11 +62,15 @@ class ShortVideoController extends Controller
 
     public function create()
     {
+        Gate::authorize('manage short videos');
+
         return Inertia::render('short-videos/create');
     }
 
     public function store(Request $request): RedirectResponse
     {
+        Gate::authorize('manage short videos');
+
         $data = $request->validate([
             'title' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string', 'max:1000'],
@@ -123,6 +130,8 @@ class ShortVideoController extends Controller
 
     public function destroy(ShortVideo $shortVideo): RedirectResponse
     {
+        Gate::authorize('manage short videos');
+
         // Delete all media (video + thumbnail) through the media pipeline
         $this->mediaService->deleteAllForModel($shortVideo);
 

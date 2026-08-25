@@ -52,6 +52,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // Gallery
     Route::get('gallery', [GalleryController::class, 'index'])->name('gallery.index');
+    Route::delete('gallery/{id}', [GalleryController::class, 'destroy'])->name('gallery.destroy');
 
     // iklan Management
     Route::get('iklan', [AdController::class, 'index'])->name('iklan.index');

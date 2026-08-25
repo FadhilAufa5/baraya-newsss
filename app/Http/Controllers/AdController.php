@@ -5,12 +5,15 @@ namespace App\Http\Controllers;
 use App\Models\Ad;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 use Inertia\Inertia;
 
 class AdController extends Controller
 {
     public function index(Request $request)
     {
+        Gate::authorize('manage iklan');
+
         $query = Ad::query()->latest();
 
         if ($request->filled('status')) {
@@ -35,11 +38,15 @@ class AdController extends Controller
 
     public function create()
     {
+        Gate::authorize('manage iklan');
+
         return Inertia::render('iklan/create');
     }
 
     public function store(Request $request): RedirectResponse
     {
+        Gate::authorize('manage iklan');
+
         $validated = $request->validate([
             'title' => ['required', 'string', 'max:255'],
             'sponsor_name' => ['nullable', 'string', 'max:150'],
@@ -68,6 +75,8 @@ class AdController extends Controller
 
     public function edit(Ad $ad)
     {
+        Gate::authorize('manage iklan');
+
         return Inertia::render('iklan/edit', [
             'ad' => $ad,
         ]);
@@ -75,6 +84,8 @@ class AdController extends Controller
 
     public function update(Request $request, Ad $ad): RedirectResponse
     {
+        Gate::authorize('manage iklan');
+
         $validated = $request->validate([
             'title' => ['required', 'string', 'max:255'],
             'sponsor_name' => ['nullable', 'string', 'max:150'],
@@ -102,6 +113,8 @@ class AdController extends Controller
 
     public function destroy(Ad $ad): RedirectResponse
     {
+        Gate::authorize('manage iklan');
+
         $ad->delete();
 
         Inertia::flash('toast', ['type' => 'success', 'message' => 'Iklan berhasil dihapus.']);
@@ -111,6 +124,8 @@ class AdController extends Controller
 
     public function toggle(Ad $ad): RedirectResponse
     {
+        Gate::authorize('manage iklan');
+
         $newState = !$ad->is_active;
         $ad->update(['is_active' => $newState]);
 

@@ -14,7 +14,7 @@ class Ad extends Model
         'sponsor_name',
         'description',
         'cta_text',
-        'cta_url',
+        'cta_url', 
         'type',
         'position',
         'is_active',

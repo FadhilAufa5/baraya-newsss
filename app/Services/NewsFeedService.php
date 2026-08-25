@@ -81,10 +81,10 @@ class NewsFeedService
             ->all();
 
         // ── Short Videos for Video Story section ───────────────────────────
-        $shortVideos = ShortVideo::where('status', 'published')
+        $shortVideos = ShortVideo::with('user')->where('status', 'published')
             ->latest('published_at')
             ->limit(4)
-            ->get(['id', 'title', 'thumbnail', 'published_at', 'views']);
+            ->get();
 
         // ── Filtered articles for category/search listing ─────────────────
         $filteredArticles = ($search || ($category && $category !== 'Home' && $category !== 'Indeks'))

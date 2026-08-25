@@ -26,7 +26,7 @@ export default function PublishPanel({ data, processing, onDataChange, onSubmit 
                 <div className="grid gap-1.5">
                     <Label>Status</Label>
                     <Select value={data.status} onValueChange={(v: 'draft' | 'published' | 'archived') => onDataChange('status', v)}>
-                        <SelectTrigger>
+                        <SelectTrigger disabled={processing}>
                             <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
@@ -44,6 +44,7 @@ export default function PublishPanel({ data, processing, onDataChange, onSubmit 
                         type="datetime-local"
                         value={data.published_at}
                         onChange={(e) => onDataChange('published_at', e.target.value)}
+                        disabled={processing}
                     />
                     <p className="text-xs text-muted-foreground">Kosongkan untuk auto-set saat tayang</p>
                 </div>
@@ -51,6 +52,7 @@ export default function PublishPanel({ data, processing, onDataChange, onSubmit 
                 <button
                     type="button"
                     onClick={() => onDataChange('is_featured', !data.is_featured)}
+                    disabled={processing}
                     className={`flex items-center gap-3 rounded-xl border p-3 transition-all ${
                         data.is_featured
                             ? 'border-amber-400 bg-amber-50 dark:bg-amber-900/20'

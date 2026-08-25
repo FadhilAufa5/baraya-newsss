@@ -25,6 +25,10 @@ class AppServiceProvider extends ServiceProvider
     {
         $this->configureDefaults();
 
+        if (str_contains(request()->header('host', ''), 'ngrok') || app()->isProduction()) {
+            \Illuminate\Support\Facades\URL::forceScheme('https');
+        }
+
         // Implicitly grant "Super Admin" role all permissions
         \Illuminate\Support\Facades\Gate::before(function ($user, $ability) {
             return $user->hasRole('Super Admin') ? true : null;

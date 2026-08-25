@@ -8,6 +8,7 @@ use App\Models\News;
 use App\Services\NewsService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 use Inertia\Inertia;
 
 class NewsController extends Controller
@@ -35,6 +36,8 @@ class NewsController extends Controller
 
     public function index(Request $request)
     {
+        Gate::authorize('view news');
+
         $query = News::with('user')->latest('published_at');
 
         if ($request->filled('search')) {
@@ -65,6 +68,8 @@ class NewsController extends Controller
 
     public function create()
     {
+        Gate::authorize('create news');
+
         return Inertia::render('news/create', [
             'categories' => self::CATEGORIES,
         ]);
@@ -72,6 +77,7 @@ class NewsController extends Controller
 
     public function store(NewsStoreRequest $request): RedirectResponse
     {
+        Gate::authorize('create news');
 
         $data = $request->validated();
         $data['user_id'] = auth()->id();
@@ -119,6 +125,8 @@ class NewsController extends Controller
 
     public function edit(News $news)
     {
+        Gate::authorize('edit news');
+
         return Inertia::render('news/edit', [
             'article' => $news,
             'categories' => self::CATEGORIES,
@@ -127,6 +135,8 @@ class NewsController extends Controller
 
     public function update(NewsUpdateRequest $request, News $news): RedirectResponse
     {
+        Gate::authorize('edit news');
+
         $data = $request->validated();
 
         $this->newsService->update(
@@ -143,6 +153,8 @@ class NewsController extends Controller
 
     public function destroy(News $news): RedirectResponse
     {
+        Gate::authorize('delete news');
+
         $this->newsService->delete($news);
 
         Inertia::flash('toast', ['type' => 'success', 'message' => 'Artikel berhasil dihapus.']);

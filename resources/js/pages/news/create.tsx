@@ -111,6 +111,7 @@ export default function CreateNews({ categories }: Props) {
                             data={data}
                             errors={errors}
                             imagePreview={imagePreview}
+                            processing={processing}
                             onDataChange={handleDataChange}
                             onImageChange={handleImageChange}
                             onRemoveImage={removeImage}

@@ -7,12 +7,15 @@ use App\Models\News;
 use App\Models\ShortVideo;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 use Inertia\Inertia;
 
 class CommentController extends Controller
 {
     public function index(Request $request)
     {
+        Gate::authorize('manage comments');
+
         $query = Comment::with(['user', 'news', 'shortVideo'])
             ->latest();
 
@@ -81,7 +84,7 @@ class CommentController extends Controller
 
     public function destroy(Comment $comment): RedirectResponse
     {
-        abort_unless($comment->user_id === auth()->id() || auth()->user()?->can('delete news'), 403);
+        abort_unless($comment->user_id === auth()->id() || auth()->user()?->can('manage comments'), 403);
 
         $comment->delete();
 
@@ -101,7 +104,7 @@ class CommentController extends Controller
 
         abort_unless(
             $comments->every(fn ($c) =>
-                $c->user_id === auth()->id() || auth()->user()?->can('delete news')
+                $c->user_id === auth()->id() || auth()->user()?->can('manage comments')
             ),
             403
         );

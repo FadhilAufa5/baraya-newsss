@@ -10,7 +10,8 @@ class NewsService
 {
     public function __construct(
         private readonly MediaService $mediaService,
-    ) {}
+    ) {
+    }
 
     /**
      * Prepare and persist a new article from validated request data.

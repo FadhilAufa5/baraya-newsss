@@ -1,5 +1,5 @@
 import { useRef } from 'react';
-import { Upload, X, Image as ImageIcon } from 'lucide-react';
+import { Upload, X, Image as ImageIcon, Loader2 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
@@ -11,12 +11,13 @@ interface Props {
     data: NewsFormData;
     errors: NewsErrors;
     imagePreview: string | null;
+    processing?: boolean;
     onDataChange: (key: keyof NewsFormData, value: unknown) => void;
     onImageChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
     onRemoveImage: () => void;
 }
 
-export default function ImageUploadCard({ data, errors, imagePreview, onDataChange, onImageChange, onRemoveImage }: Props) {
+export default function ImageUploadCard({ data, errors, imagePreview, processing, onDataChange, onImageChange, onRemoveImage }: Props) {
     const fileRef = useRef<HTMLInputElement>(null);
 
     return (
@@ -28,30 +29,43 @@ export default function ImageUploadCard({ data, errors, imagePreview, onDataChan
                 </CardTitle>
             </CardHeader>
             <CardContent className="flex flex-col gap-3">
-                {imagePreview ? (
-                    <div className="relative overflow-hidden rounded-xl border">
-                        <img src={imagePreview} alt="Preview" className="h-56 w-full object-cover" />
+                <div className="relative">
+                    {imagePreview ? (
+                        <div className="relative overflow-hidden rounded-xl border">
+                            <img src={imagePreview} alt="Preview" className="h-56 w-full object-cover" />
+                            <button
+                                type="button"
+                                onClick={onRemoveImage}
+                                disabled={processing}
+                                className="absolute top-2 right-2 flex size-8 items-center justify-center rounded-full bg-black/60 text-white transition-colors hover:bg-black/80 disabled:opacity-50"
+                            >
+                                <X className="size-4" />
+                            </button>
+                        </div>
+                    ) : (
                         <button
                             type="button"
-                            onClick={onRemoveImage}
-                            className="absolute top-2 right-2 flex size-8 items-center justify-center rounded-full bg-black/60 text-white transition-colors hover:bg-black/80"
+                            onClick={() => fileRef.current?.click()}
+                            disabled={processing}
+                            className="flex h-44 w-full flex-col items-center justify-center gap-3 rounded-xl border-2 border-dashed border-muted-foreground/25 bg-muted/20 text-muted-foreground transition-colors hover:border-primary/40 hover:bg-muted/40 hover:text-foreground disabled:opacity-60 disabled:cursor-not-allowed"
                         >
-                            <X className="size-4" />
+                            <Upload className="size-8 opacity-50" />
+                            <div className="text-center">
+                                <p className="text-sm font-medium">Klik untuk upload gambar</p>
+                                <p className="text-xs">JPG, PNG, WebP — maks 4MB</p>
+                            </div>
                         </button>
-                    </div>
-                ) : (
-                    <button
-                        type="button"
-                        onClick={() => fileRef.current?.click()}
-                        className="flex h-44 w-full flex-col items-center justify-center gap-3 rounded-xl border-2 border-dashed border-muted-foreground/25 bg-muted/20 text-muted-foreground transition-colors hover:border-primary/40 hover:bg-muted/40 hover:text-foreground"
-                    >
-                        <Upload className="size-8 opacity-50" />
-                        <div className="text-center">
-                            <p className="text-sm font-medium">Klik untuk upload gambar</p>
-                            <p className="text-xs">JPG, PNG, WebP — maks 4MB</p>
+                    )}
+
+                    {processing && (
+                        <div className="absolute inset-0 z-10 flex items-center justify-center rounded-xl bg-black/40 backdrop-blur-sm">
+                            <div className="flex flex-col items-center gap-2">
+                                <Loader2 className="size-8 animate-spin text-white" />
+                                <span className="text-xs font-semibold text-white drop-shadow-lg">Mengunggah...</span>
+                            </div>
                         </div>
-                    </button>
-                )}
+                    )}
+                </div>
 
                 <input
                     ref={fileRef}
@@ -59,11 +73,19 @@ export default function ImageUploadCard({ data, errors, imagePreview, onDataChan
                     accept="image/*"
                     className="hidden"
                     onChange={onImageChange}
+                    disabled={processing}
                 />
 
                 {imagePreview && (
-                    <Button type="button" variant="outline" size="sm" onClick={() => fileRef.current?.click()} className="gap-2">
-                        <Upload className="size-3.5" />
+                    <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => fileRef.current?.click()}
+                        disabled={processing}
+                        className="gap-2"
+                    >
+                        {processing ? <Loader2 className="size-3.5 animate-spin" /> : <Upload className="size-3.5" />}
                         Ganti Gambar
                     </Button>
                 )}
@@ -75,6 +97,7 @@ export default function ImageUploadCard({ data, errors, imagePreview, onDataChan
                         value={data.image_caption}
                         onChange={(e) => onDataChange('image_caption', e.target.value)}
                         placeholder="Sumber / deskripsi gambar..."
+                        disabled={processing}
                     />
                 </div>
 

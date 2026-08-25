@@ -3,6 +3,21 @@ import { Clock, Play, ChevronRight, TrendingUp, LayoutGrid, Tag } from 'lucide-r
 import { CategoryBadge } from './category-badge';
 import { GradientPlaceholder } from './gradient-placeholder';
 import { AdBanner } from './ad-banner';
+import { CATEGORIES } from './header';
+import { imageUrl } from '@/lib/utils';
+
+interface ShortVideoItem {
+    id: number;
+    title: string;
+    description: string | null;
+    video: string;
+    thumbnail: string | null;
+    status: string;
+    published_at: string | null;
+    views: number;
+    user?: { name: string };
+    created_at: string;
+}
 
 interface Article {
     id: number;
@@ -24,14 +39,16 @@ interface VideoStory {
 interface NewsSectionsProps {
     beritaTerbaru: Article[];
     pilihanRedaksi: Article & { author?: string | null; excerpt?: string | null };
-    videoStories: VideoStory[];
+    shortVideos: ShortVideoItem[];
+    onSelectVideo: (video: ShortVideoItem) => void;
     beritaTerpopuler: { id: number; title: string; published_at: string }[];
 }
 
 export function NewsSections({
     beritaTerbaru,
     pilihanRedaksi,
-    videoStories,
+    shortVideos,
+    onSelectVideo,
     beritaTerpopuler,
 }: NewsSectionsProps) {
     const [activeTab, setActiveTab] = useState('Semua');
@@ -113,12 +130,6 @@ export function NewsSections({
                         ) : (
                             <GradientPlaceholder category={pilihanRedaksi.category} className="w-full h-full" />
                         )}
-                        <div className="absolute inset-0 flex items-center justify-center">
-                            <div className="flex size-12 items-center justify-center rounded-full bg-white/20 backdrop-blur-sm ring-2 ring-white/40 transition-transform group-hover:scale-110">
-                                <Play className="size-6 text-white fill-white ml-0.5" />
-                            </div>
-                        </div>
-                        <div className="absolute bottom-2 right-2 rounded bg-black/60 px-1.5 py-0.5 text-xs font-bold text-white">0:58</div>
                     </div>
                     <div className="p-4">
                         <CategoryBadge category={pilihanRedaksi.category} />
@@ -145,19 +156,22 @@ export function NewsSections({
                         </button>
                     </div>
                     <div className="grid grid-cols-2 gap-2">
-                        {videoStories.map((v) => (
-                            <div key={v.id} className="group cursor-pointer rounded-lg overflow-hidden bg-gray-200 dark:bg-gray-700 relative aspect-video">
+                        {shortVideos.slice(0, 4).map((v) => (
+                            <div key={v.id} onClick={() => onSelectVideo(v)} className="group cursor-pointer rounded-lg overflow-hidden bg-gray-200 dark:bg-gray-700 relative aspect-video">
+                                {v.thumbnail ? (
+                                    <img src={imageUrl(v.thumbnail)!} alt={v.title} className="absolute inset-0 w-full h-full object-cover" />
+                                ) : (
+                                    <div className="absolute inset-0 bg-gradient-to-br from-red-600 to-black" />
+                                )}
                                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
                                 <div className="absolute inset-0 flex items-center justify-center">
-                                    <div className="flex size-7 items-center justify-center rounded-full bg-white/20 ring-1 ring-white/40">
+                                    <div className="flex size-7 items-center justify-center rounded-full bg-white/20 ring-1 ring-white/40 group-hover:scale-110 transition-transform">
                                         <Play className="size-3.5 text-white fill-white ml-0.5" />
                                     </div>
                                 </div>
                                 <div className="absolute bottom-1 left-1 right-1">
                                     <p className="text-[9px] font-semibold text-white line-clamp-2 leading-tight">{v.title}</p>
-                                    <span className="text-[8px] text-gray-300">{v.time_ago}</span>
                                 </div>
-                                <div className="absolute top-1 right-1 rounded bg-black/60 px-1 py-px text-[8px] font-bold text-white">{v.duration}</div>
                             </div>
                         ))}
                     </div>
@@ -192,27 +206,6 @@ export function NewsSections({
                     ))}
                 </div>
 
-                {/* Quick Stats Box */}
-                <div className="mt-5 rounded-xl bg-gradient-to-br from-red-600 to-red-800 p-4 text-white shadow-md">
-                    <div className="flex items-center gap-2 mb-3">
-                        <LayoutGrid className="size-4" />
-                        <span className="text-xs font-black uppercase tracking-wide">Statistik Portal</span>
-                    </div>
-                    <div className="grid grid-cols-2 gap-3">
-                        {[
-                            { label: 'Total Berita', value: '12.8K' },
-                            { label: 'Kategori', value: '10' },
-                            { label: 'Pembaca/Hari', value: '48K' },
-                            { label: 'Kontributor', value: '35' },
-                        ].map((stat) => (
-                            <div key={stat.label} className="rounded-lg bg-white/10 p-2.5 text-center">
-                                <div className="text-lg font-black">{stat.value}</div>
-                                <div className="text-[9px] text-red-200 uppercase tracking-wide">{stat.label}</div>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-
                 {/* Rectangle Ad */}
                 <AdBanner
                     type="rectangle"
@@ -233,10 +226,10 @@ export function NewsSections({
                         </h3>
                     </div>
                     <div className="flex flex-wrap gap-2">
-                        {['Ridwan Kamil', 'Pemilu 2024', 'Persib', 'Bandung', 'Ekonomi', 'KCIC Whoosh', 'Kawah Putih', 'Inflasi', 'Tol Getaci'].map((tag) => (
-                            <button key={tag} className="rounded-full border border-gray-200 bg-white px-2.5 py-1 text-[10px] font-semibold text-gray-600 hover:border-red-400 hover:bg-red-50 hover:text-red-600 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 transition-colors">
+                        {CATEGORIES.filter(c => c !== 'Home' && c !== 'Indeks').map((tag) => (
+                            <a key={tag} href={`/?category=${tag}`} className="rounded-full border border-gray-200 bg-white px-2.5 py-1 text-[10px] font-semibold text-gray-600 hover:border-red-400 hover:bg-red-50 hover:text-red-600 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 transition-colors">
                                 #{tag}
-                            </button>
+                            </a>
                         ))}
                     </div>
                 </div>

@@ -8,6 +8,8 @@ import { NewsSections } from '@/components/welcome/news-sections';
 import { Footer } from '@/components/welcome/footer';
 import { GradientPlaceholder } from '@/components/welcome/gradient-placeholder';
 import { imageUrl } from '@/lib/utils';
+import { VideoCard } from '@/components/short-videos/video-card';
+import { VideoModal } from '@/components/short-videos/video-modal';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -28,9 +30,14 @@ interface Article {
 interface ShortVideoItem {
     id: number;
     title: string;
+    description: string | null;
+    video: string;
     thumbnail: string | null;
+    status: string;
     published_at: string | null;
     views: number;
+    user?: { name: string };
+    created_at: string;
 }
 
 interface Ad {
@@ -57,7 +64,7 @@ interface Props {
     ads: Ad[];
 }
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
+
 
 function formatDate(dateStr: string | null): string {
     if (!dateStr) return '';
@@ -67,7 +74,7 @@ function formatDate(dateStr: string | null): string {
     }) + ' • ' + d.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) + ' WIB';
 }
 
-// ─── Component ────────────────────────────────────────────────────────────────
+
 
 export default function Welcome({
     heroArticle,
@@ -86,6 +93,11 @@ export default function Welcome({
     const [activeCategory, setActiveCategory] = useState(filters.category ?? 'Home');
     const [searchQuery, setSearchQuery] = useState(filters.search ?? '');
     const [trendingIndex, setTrendingIndex] = useState(0);
+    const [activeVideo, setActiveVideo] = useState<ShortVideoItem | null>(null);
+
+    const activeVideoIndex = activeVideo ? shortVideos.findIndex((v) => v.id === activeVideo.id) : -1;
+    const handlePrevVideo = () => { if (activeVideoIndex > 0) setActiveVideo(shortVideos[activeVideoIndex - 1]); };
+    const handleNextVideo = () => { if (activeVideoIndex < shortVideos.length - 1) setActiveVideo(shortVideos[activeVideoIndex + 1]); };
 
     // ── Navigation helpers ──────────────────────────────────────────────────
     const navigate = (cat: string, search: string) => {
@@ -127,16 +139,8 @@ export default function Welcome({
     const terpopuler = beritaTerpopuler.map((a) => ({
         ...a,
         published_at: formatDate(a.published_at),
-    }));
+    })); 
     const filteredNorm = filteredArticles.map(normalise);
-
-    // Video Story items for NewsSections ────────────────────────────────────
-    const videoStoryItems = shortVideos.map((v) => ({
-        id: v.id,
-        title: v.title,
-        duration: '—',
-        time_ago: formatDate(v.published_at),
-    }));
 
     // Fallback trending items if no real data yet ───────────────────────────
     const trendingFinal = trendingItems.length > 0
@@ -151,6 +155,18 @@ export default function Welcome({
     return (
         <>
             <Head title="Baraya News - Portal Berita Terkini Jawa Barat" />
+
+            {/* Modal */}
+            {activeVideo && (
+                <VideoModal
+                    video={activeVideo as any}
+                    videos={shortVideos as any}
+                    onClose={() => setActiveVideo(null)}
+                    onPrev={handlePrevVideo}
+                    onNext={handleNextVideo}
+                    auth={auth as any}
+                />
+            )}
 
             {/* TOP HEADER */}
             <Header
@@ -210,7 +226,8 @@ export default function Welcome({
                             <NewsSections
                                 beritaTerbaru={terbaru}
                                 pilihanRedaksi={pilihanNorm ?? (terbaru[0] ?? heroNorm)}
-                                videoStories={videoStoryItems}
+                                shortVideos={shortVideos}
+                                onSelectVideo={setActiveVideo}
                                 beritaTerpopuler={terpopuler}
                             />
                         </>
@@ -244,29 +261,7 @@ export default function Welcome({
 
                             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
                                 {shortVideos.map((vid) => (
-                                    <div key={vid.id} className="group bg-white dark:bg-gray-950 rounded-xl overflow-hidden border border-gray-200 dark:border-gray-850 shadow-sm hover:shadow-md transition-all duration-300 flex flex-col h-full">
-                                        <div className="relative aspect-video bg-gradient-to-br from-red-600 to-black flex items-center justify-center overflow-hidden shrink-0">
-                                            {vid.thumbnail ? (
-                                                <img
-                                                    src={imageUrl(vid.thumbnail)!}
-                                                    alt={vid.title}
-                                                    className="absolute inset-0 w-full h-full object-cover"
-                                                />
-                                            ) : null}
-                                            <div className="absolute inset-0 bg-black/40 group-hover:bg-black/20 transition-colors duration-300" />
-                                            <div className="relative z-10 flex size-12 items-center justify-center rounded-full bg-white/95 text-red-600 shadow-lg group-hover:scale-110 transition-transform duration-300">
-                                                <span className="text-lg translate-x-[1px]">▶</span>
-                                            </div>
-                                        </div>
-                                        <div className="p-4 flex-1 flex flex-col justify-between space-y-3">
-                                            <h3 className="text-xs font-bold text-gray-900 dark:text-white line-clamp-2 group-hover:text-red-600 dark:group-hover:text-red-500 transition-colors leading-snug">
-                                                <a href={`/videos/${vid.id}`}>{vid.title}</a>
-                                            </h3>
-                                            <span className="text-[10px] text-gray-400 dark:text-gray-500 font-medium">
-                                                {formatDate(vid.published_at)}
-                                            </span>
-                                        </div>
-                                    </div>
+                                    <VideoCard key={vid.id} video={vid as any} onSelect={setActiveVideo as any} />
                                 ))}
                             </div>
                         </div>

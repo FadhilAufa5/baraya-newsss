@@ -2,7 +2,7 @@ import { Head, Link, router } from '@inertiajs/react';
 import { useState } from 'react';
 import {
     Images, Download, Image as ImageIcon, Film, Search, X, FileX,
-    ChevronLeft, ChevronRight,
+    ChevronLeft, ChevronRight, Trash2,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -11,6 +11,10 @@ import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
     Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from '@/components/ui/table';
+import {
+    Dialog, DialogContent, DialogDescription, DialogFooter,
+    DialogHeader, DialogTitle,
+} from '@/components/ui/dialog';
 import { imageUrl } from '@/lib/utils';
 
 interface MediaItem {
@@ -67,6 +71,24 @@ function formatDate(s: string) {
 export default function GalleryIndex({ media, type }: Props) {
     const [activeTab, setActiveTab] = useState(type);
     const [search, setSearch] = useState('');
+    const [deleteId, setDeleteId] = useState<string | null>(null);
+    const [isDeleting, setIsDeleting] = useState(false);
+
+    const handleDelete = (id: string) => {
+        setDeleteId(id);
+    };
+
+    const confirmDelete = () => {
+        if (!deleteId) return;
+        setIsDeleting(true);
+        router.delete(`/gallery/${deleteId}`, {
+            preserveScroll: true,
+            onFinish: () => {
+                setIsDeleting(false);
+                setDeleteId(null);
+            },
+        });
+    };
 
     const handleTabChange = (value: string) => {
         setActiveTab(value);
@@ -216,21 +238,31 @@ export default function GalleryIndex({ media, type }: Props) {
                                                 {formatDate(item.created_at)}
                                             </TableCell>
                                             <TableCell className="text-right">
-                                                {fileUrl && (
-                                                    <a
-                                                        href={fileUrl}
-                                                        download
-                                                        className="inline-flex items-center justify-center"
-                                                    >
-                                                        <Button
-                                                            variant="ghost"
-                                                            size="icon"
-                                                            className="size-8 text-muted-foreground hover:text-foreground"
+                                                <div className="flex items-center justify-end gap-1">
+                                                    {fileUrl && (
+                                                        <a
+                                                            href={fileUrl}
+                                                            download
+                                                            className="inline-flex items-center justify-center"
                                                         >
-                                                            <Download className="size-4" />
-                                                        </Button>
-                                                    </a>
-                                                )}
+                                                            <Button
+                                                                variant="ghost"
+                                                                size="icon"
+                                                                className="size-8 text-muted-foreground hover:text-foreground"
+                                                            >
+                                                                <Download className="size-4" />
+                                                            </Button>
+                                                        </a>
+                                                    )}
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="icon"
+                                                        className="size-8 text-muted-foreground hover:text-destructive"
+                                                        onClick={() => handleDelete(item.id)}
+                                                    >
+                                                        <Trash2 className="size-4" />
+                                                    </Button>
+                                                </div>
                                             </TableCell>
                                         </TableRow>
                                     );
@@ -286,6 +318,33 @@ export default function GalleryIndex({ media, type }: Props) {
                     </div>
                 )}
             </div>
+
+            <Dialog open={!!deleteId} onOpenChange={(open) => !open && setDeleteId(null)}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>Hapus Media</DialogTitle>
+                        <DialogDescription>
+                            Apakah Anda yakin ingin menghapus media ini? Tindakan ini tidak dapat dibatalkan.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <DialogFooter className="gap-2 sm:gap-0 mt-4">
+                        <Button
+                            variant="outline"
+                            onClick={() => setDeleteId(null)}
+                            disabled={isDeleting}
+                        >
+                            Batal
+                        </Button>
+                        <Button
+                            variant="destructive"
+                            onClick={confirmDelete}
+                            disabled={isDeleting}
+                        >
+                            {isDeleting ? 'Menghapus...' : 'Ya, Hapus'}
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
         </>
     );
 }
