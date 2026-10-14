@@ -42,6 +42,8 @@ import {
 import InputError from '@/components/input-error';
 import { Spinner } from '@/components/ui/spinner';
 import RichTextEditor from '@/components/ui/rich-text-editor';
+import PublishPanel from '@/components/news/publish-panel';
+import type { NewsFormData } from '@/components/news/types';
 
 interface Article {
     id: number;
@@ -637,153 +639,12 @@ export default function EditNews({ article, categories }: Props) {
 
                     {/* RIGHT — Publish */}
                     <div className="flex flex-col gap-4">
-                        <Card className="sticky top-4">
-                            <CardHeader className="pb-3">
-                                <CardTitle className="text-sm font-semibold">
-                                    Pengaturan Publikasi
-                                </CardTitle>
-                            </CardHeader>
-                            <CardContent className="flex flex-col gap-4">
-                                <div className="grid gap-1.5">
-                                    <Label>Status</Label>
-                                    <Select
-                                        value={data.status}
-                                        onValueChange={(
-                                            v:
-                                                | 'draft'
-                                                | 'published'
-                                                | 'archived',
-                                        ) => setData('status', v)}
-                                    >
-                                        <SelectTrigger>
-                                            <SelectValue />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem value="draft">
-                                                🗒️ Draft
-                                            </SelectItem>
-                                            <SelectItem value="published">
-                                                ✅ Tayang
-                                            </SelectItem>
-                                            <SelectItem value="archived">
-                                                📦 Arsip
-                                            </SelectItem>
-                                        </SelectContent>
-                                    </Select>
-                                </div>
-
-                                <div className="grid gap-1.5">
-                                    <Label htmlFor="published_at">
-                                        Tanggal Terbit
-                                    </Label>
-                                    <Input
-                                        id="published_at"
-                                        type="datetime-local"
-                                        value={data.published_at}
-                                        onChange={(e) =>
-                                            setData(
-                                                'published_at',
-                                                e.target.value,
-                                            )
-                                        }
-                                    />
-                                </div>
-
-                                <button
-                                    type="button"
-                                    onClick={() =>
-                                        setData(
-                                            'is_featured',
-                                            !data.is_featured,
-                                        )
-                                    }
-                                    className={`flex items-center gap-3 rounded-xl border p-3 transition-all ${data.is_featured
-                                        ? 'border-amber-400 bg-amber-50 dark:bg-amber-900/20'
-                                        : 'border-border hover:border-amber-300'
-                                        }`}
-                                >
-                                    <Star
-                                        className={`size-5 ${data.is_featured ? 'fill-amber-400 text-amber-400' : 'text-muted-foreground'}`}
-                                    />
-                                    <div className="text-left">
-                                        <p className="text-sm font-medium">
-                                            Artikel Unggulan
-                                        </p>
-                                        <p className="text-xs text-muted-foreground">
-                                            Tampil di posisi hero
-                                        </p>
-                                    </div>
-                                </button>
-
-                                <Separator />
-
-                                <div className="space-y-1.5 rounded-lg bg-muted/40 p-3 text-xs text-muted-foreground">
-                                    <div className="flex justify-between">
-                                        <span>Kategori</span>
-                                        <span className="font-medium text-foreground">
-                                            {data.category || '—'}
-                                        </span>
-                                    </div>
-                                    <div className="flex justify-between">
-                                        <span>Penulis</span>
-                                        <span className="font-medium text-foreground">
-                                            {data.author || '—'}
-                                        </span>
-                                    </div>
-                                    <div className="flex justify-between">
-                                        <span>Tags</span>
-                                        <span className="font-medium text-foreground">
-                                            {data.tags.length} tag
-                                        </span>
-                                    </div>
-                                    <div className="flex justify-between">
-                                        <span>Gambar</span>
-                                        <span className="font-medium text-foreground">
-                                            {imagePreview ? '✓' : '—'}
-                                        </span>
-                                    </div>
-                                </div>
-
-                                <Separator />
-
-                                <div className="flex flex-col gap-2">
-                                    <Button
-                                        type="button"
-                                        className="w-full gap-2 bg-red-600 hover:bg-red-700"
-                                        disabled={processing}
-                                        onClick={() => submit('published')}
-                                    >
-                                        {processing ? (
-                                            <Spinner />
-                                        ) : (
-                                            <Send className="size-4" />
-                                        )}
-                                        Perbarui & Tayang
-                                    </Button>
-                                    <Button
-                                        type="button"
-                                        variant="outline"
-                                        className="w-full gap-2"
-                                        disabled={processing}
-                                        onClick={() => submit(data.status)}
-                                    >
-                                        {processing ? (
-                                            <Spinner />
-                                        ) : (
-                                            <Save className="size-4" />
-                                        )}
-                                        Simpan Perubahan
-                                    </Button>
-                                    <Button
-                                        asChild
-                                        variant="ghost"
-                                        className="w-full text-muted-foreground"
-                                    >
-                                        <Link href="/news">Batal</Link>
-                                    </Button>
-                                </div>
-                            </CardContent>
-                        </Card>
+                        <PublishPanel
+                            data={data as unknown as NewsFormData}
+                            processing={processing}
+                            onDataChange={(key, value) => setData(key as any, value as any)}
+                            onSubmit={submit}
+                        />
                     </div>
                 </div>
             </div>

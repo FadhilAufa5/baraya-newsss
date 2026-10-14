@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\NewsStoreRequest;
 use App\Http\Requests\NewsUpdateRequest;
+use App\Models\Ad;
 use App\Models\News;
 use App\Services\NewsService;
 use Illuminate\Http\RedirectResponse;
@@ -115,10 +116,15 @@ class NewsController extends Controller
             ->limit(5)
             ->get(['id', 'title', 'slug', 'category', 'image', 'published_at', 'excerpt', 'views']);
 
+        $ads = Ad::active()
+            ->orderBy('sort_order')
+            ->get();
+
         return Inertia::render('news/public-show', [
             'article' => $news->load(['user', 'comments.user']),
             'related' => $related,
             'others' => $others,
+            'ads' => $ads,
             'canManageComments' => auth()->user()?->can('delete news') ?? false,
         ]);
     }

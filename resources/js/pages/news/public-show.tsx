@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Head, usePage, router, useForm } from '@inertiajs/react';
 import { Header } from '@/components/welcome/header';
 import { Footer } from '@/components/welcome/footer';
+import { AdBanner } from '@/components/welcome/ad-banner';
 import { GradientPlaceholder } from '@/components/welcome/gradient-placeholder';
 import { imageUrl } from '@/lib/utils';
 import {
@@ -11,6 +12,17 @@ import {
 } from 'lucide-react';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
+
+interface Ad {
+    id: number;
+    title: string;
+    sponsor_name: string | null;
+    description: string | null;
+    cta_text: string;
+    cta_url: string;
+    type: 'leaderboard' | 'in-feed' | 'rectangle';
+    position: 'top' | 'middle' | 'sidebar';
+}
 
 interface Comment {
     id: number;
@@ -60,6 +72,7 @@ interface Props {
     article: Article;
     related: RelatedArticle[];
     others?: RelatedArticle[];
+    ads?: Ad[];
     canManageComments: boolean;
 }
 
@@ -187,7 +200,7 @@ function ShareButtons({ title }: { title: string }) {
 
 // ─── Main Component ───────────────────────────────────────────────────────────
 
-export default function PublicShowNews({ article, related, others = [] }: Props) {
+export default function PublicShowNews({ article, related, others = [], ads = [] }: Props) {
     const { auth } = usePage<{ auth: { user: { id: number; name: string; roles?: string[] } | null } }>().props;
 
     const [activeCategory, setActiveCategory] = useState('Home');
@@ -226,6 +239,11 @@ export default function PublicShowNews({ article, related, others = [] }: Props)
     const catColor = CATEGORY_COLORS[article.category] ?? 'bg-gray-500 text-white';
     const catText = CATEGORY_TEXT[article.category] ?? 'text-gray-600';
 
+    const topAd = ads.find((ad) => ad.position === 'top' || ad.type === 'leaderboard');
+    const sidebarAds = ads.filter((ad) => ad.position === 'sidebar' || ad.type === 'rectangle');
+    const fallbackSidebarAds = sidebarAds.length > 0 ? sidebarAds : ads.filter((ad) => ad.id !== topAd?.id);
+    const contentAds = ads.filter((ad) => ad.position === 'middle' || ad.type === 'in-feed');
+
     return (
         <>
             <Head title={`${article.title} – Baraya News`}>
@@ -251,6 +269,20 @@ export default function PublicShowNews({ article, related, others = [] }: Props)
             {/* MAIN */}
             <div className="bg-white dark:bg-gray-950 min-h-screen">
                 <div className="mx-auto max-w-[1200px] px-4 py-6 sm:px-6">
+
+                    {/* Top Ad (Leaderboard) */}
+                    {topAd && (
+                        <div className="mb-6">
+                            <AdBanner
+                                type={topAd.type}
+                                title={topAd.title}
+                                description={topAd.description || ''}
+                                ctaText={topAd.cta_text}
+                                ctaUrl={topAd.cta_url}
+                                sponsorName={topAd.sponsor_name || 'Sponsor'}
+                            />
+                        </div>
+                    )}
 
                     {/* Breadcrumb */}
                     <nav className="mb-5 flex items-center gap-1.5 text-xs text-gray-400 dark:text-gray-500">
@@ -427,6 +459,23 @@ export default function PublicShowNews({ article, related, others = [] }: Props)
                                 </button>
                             </div>
 
+                            {/* In-feed / Content Ads */}
+                            {contentAds.length > 0 && (
+                                <div className="mt-8 space-y-4">
+                                    {contentAds.map((ad) => (
+                                        <AdBanner
+                                            key={ad.id}
+                                            type={ad.type}
+                                            title={ad.title}
+                                            description={ad.description || ''}
+                                            ctaText={ad.cta_text}
+                                            ctaUrl={ad.cta_url}
+                                            sponsorName={ad.sponsor_name || 'Sponsor'}
+                                        />
+                                    ))}
+                                </div>
+                            )}
+
                             {/* Comments Section */}
                             <div className="mt-12 space-y-6">
                                 <div className="flex items-center gap-2 border-b border-gray-150 pb-3 dark:border-gray-800">
@@ -553,7 +602,7 @@ export default function PublicShowNews({ article, related, others = [] }: Props)
                                     </div>
                                     <div className="divide-y divide-gray-50 dark:divide-gray-800">
                                         {related.map((art, idx) => (
-                                            <a
+                                             <a
                                                 key={art.id}
                                                 href={`/news/${art.slug}`}
                                                 className="group flex gap-3 p-3.5 hover:bg-red-50/40 dark:hover:bg-gray-800/40 transition-colors"
@@ -641,6 +690,23 @@ export default function PublicShowNews({ article, related, others = [] }: Props)
                                             </a>
                                         ))}
                                     </div>
+                                </div>
+                            )}
+
+                            {/* ══════════════════════ ADS DI SIDEBAR (Di bawah Artikel Lainnya) ══════════════════════ */}
+                            {fallbackSidebarAds.length > 0 && (
+                                <div className="space-y-4">
+                                    {fallbackSidebarAds.map((ad) => (
+                                        <AdBanner
+                                            key={ad.id}
+                                            type={ad.type}
+                                            title={ad.title}
+                                            description={ad.description || ''}
+                                            ctaText={ad.cta_text}
+                                            ctaUrl={ad.cta_url}
+                                            sponsorName={ad.sponsor_name || 'Sponsor'}
+                                        />
+                                    ))}
                                 </div>
                             )}
 
