@@ -15,6 +15,7 @@ use Inertia\Inertia;
 class NewsController extends Controller
 {
     const CATEGORIES = [
+        'Jawa Barat',
         'Nasional',
         'Internasional',
         'Politik',
@@ -22,17 +23,118 @@ class NewsController extends Controller
         'Olahraga',
         'Teknologi',
         'Hiburan',
+        'Lifestyle',
+        'Otomotif',
         'Kesehatan',
         'Pendidikan',
         'Budaya',
         'Lingkungan',
         'Hukum',
+        'Wisata',
         'Umum',
     ];
 
     public function __construct(
         private readonly NewsService $newsService,
     ) {
+    }
+
+    public function publicIndex(Request $request)
+    {
+        $query = News::published()->with('user');
+
+        if ($request->filled('search')) {
+            $search = trim($request->search);
+            $query->where(function ($q) use ($search) {
+                $q->where('title', 'like', "%{$search}%")
+                    ->orWhere('author', 'like', "%{$search}%")
+                    ->orWhere('excerpt', 'like', "%{$search}%")
+                    ->orWhere('content', 'like', "%{$search}%");
+            });
+        }
+
+        if ($request->filled('category') && $request->category !== 'all' && $request->category !== 'Semua' && $request->category !== 'Indeks') {
+            $query->where('category', $request->category);
+        }
+
+        if ($request->filled('tag')) {
+            $tag = trim($request->tag);
+            $query->whereJsonContains('tags', $tag);
+        }
+
+        if ($request->filled('date')) {
+            $date = $request->date;
+            if ($date === 'today' || $date === 'hari-ini') {
+                $query->whereDate('published_at', today());
+            } elseif ($date === 'week' || $date === 'minggu-ini') {
+                $query->where('published_at', '>=', now()->subDays(7));
+            } elseif ($date === 'month' || $date === 'bulan-ini') {
+                $query->where('published_at', '>=', now()->subDays(30));
+            } elseif (preg_match('/^\d{4}-\d{2}-\d{2}$/', $date)) {
+                $query->whereDate('published_at', $date);
+            }
+        }
+
+        $sort = $request->input('sort', 'terbaru');
+        if ($sort === 'terpopuler') {
+            $query->orderByDesc('views')->latest('published_at');
+        } elseif ($sort === 'terlama') {
+            $query->oldest('published_at');
+        } else {
+            $query->latest('published_at');
+        }
+
+        $news = $query->paginate(12)->withQueryString();
+
+        $beritaTerpopuler = News::published()
+            ->orderByDesc('views')
+            ->limit(5)
+            ->get(['id', 'title', 'slug', 'category', 'image', 'published_at', 'views']);
+
+        $trendingItems = News::published()
+            ->orderByDesc('views')
+            ->limit(5)
+            ->pluck('title')
+            ->all();
+
+        $ads = Ad::active()
+            ->orderBy('sort_order')
+            ->get();
+
+        $allTags = News::published()
+            ->whereNotNull('tags')
+            ->pluck('tags')
+            ->flatten()
+            ->filter()
+            ->countBy()
+            ->sortDesc()
+            ->take(12)
+            ->keys()
+            ->values()
+            ->all();
+
+        $categoryCounts = News::published()
+            ->selectRaw('category, count(*) as total')
+            ->groupBy('category')
+            ->pluck('total', 'category')
+            ->all();
+
+        return Inertia::render('news/public-index', [
+            'news' => $news,
+            'filters' => [
+                'search' => $request->input('search'),
+                'category' => $request->input('category'),
+                'sort' => $request->input('sort', 'terbaru'),
+                'date' => $request->input('date'),
+                'tag' => $request->input('tag'),
+            ],
+            'categories' => self::CATEGORIES,
+            'categoryCounts' => $categoryCounts,
+            'popularTags' => $allTags,
+            'beritaTerpopuler' => $beritaTerpopuler,
+            'trendingItems' => $trendingItems,
+            'ads' => $ads,
+        ]);
     }
 
     public function index(Request $request)

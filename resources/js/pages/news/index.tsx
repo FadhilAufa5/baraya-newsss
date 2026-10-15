@@ -354,7 +354,7 @@ export default function NewsIndex({ news, filters, categories }: Props) {
         filters.search ||
         (filters.category && filters.category !== 'all') ||
         (filters.status && filters.status !== 'all')
-    );w
+    );
 
     const [featured, ...rest] = news.data;
     const isFirstPage = news.current_page === 1;

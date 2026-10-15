@@ -108,7 +108,7 @@ export default function RichTextEditor({
     // Sync external value changes (e.g. when editing an existing article)
     useEffect(() => {
         if (editor && value !== editor.getHTML()) {
-            editor.commands.setContent(value, false);
+            editor.commands.setContent(value, { emitUpdate: false });
         }
     // Only sync when value changes from outside (not from internal edits)
     // eslint-disable-next-line react-hooks/exhaustive-deps

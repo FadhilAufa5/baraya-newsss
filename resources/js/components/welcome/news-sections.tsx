@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Link } from '@inertiajs/react';
 import { Clock, Play, ChevronRight, TrendingUp, LayoutGrid, Tag } from 'lucide-react';
 import { CategoryBadge } from './category-badge';
 import { GradientPlaceholder } from './gradient-placeholder';
@@ -23,6 +24,7 @@ interface Article {
     id: number;
     category: string;
     title: string;
+    slug?: string;
     excerpt?: string | null;
     published_at: string;
     views?: number;
@@ -41,7 +43,7 @@ interface NewsSectionsProps {
     pilihanRedaksi: Article & { author?: string | null; excerpt?: string | null };
     shortVideos: ShortVideoItem[];
     onSelectVideo: (video: ShortVideoItem) => void;
-    beritaTerpopuler: { id: number; title: string; published_at: string }[];
+    beritaTerpopuler: { id: number; title: string; slug: string; published_at: string }[];
 }
 
 export function NewsSections({
@@ -52,6 +54,15 @@ export function NewsSections({
     beritaTerpopuler,
 }: NewsSectionsProps) {
     const [activeTab, setActiveTab] = useState('Semua');
+
+    const displayedArticles = activeTab === 'Semua'
+        ? beritaTerbaru
+        : beritaTerbaru.filter((art) => {
+            if (activeTab === 'Lainnya') {
+                return !['Jawa Barat', 'Nasional', 'Ekonomi', 'Olahraga'].includes(art.category);
+            }
+            return art.category?.toLowerCase() === activeTab.toLowerCase();
+        });
 
     return (
         <section className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_340px_260px]">
@@ -67,9 +78,9 @@ export function NewsSections({
                             <button
                                 key={tab}
                                 onClick={() => setActiveTab(tab)}
-                                className={`shrink-0 rounded-full px-3 py-1 text-[10px] font-bold uppercase transition-colors ${
+                                className={`shrink-0 rounded-full px-3 py-1 text-[10px] font-bold uppercase transition-colors cursor-pointer ${
                                     activeTab === tab 
-                                        ? 'bg-red-600 text-white' 
+                                        ? 'bg-red-600 text-white shadow-xs' 
                                         : 'bg-gray-200 text-gray-600 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-300'
                                 }`}
                             >
@@ -80,35 +91,48 @@ export function NewsSections({
                 </div>
 
                 <div className="space-y-4">
-                    {beritaTerbaru.map((art) => (
-                        <a key={art.id} href={`/news/${art.slug}`} className="group flex gap-3 rounded-xl bg-white dark:bg-gray-800 shadow-sm overflow-hidden hover:shadow-md transition-shadow cursor-pointer">
-                            <div className="w-28 shrink-0 sm:w-32">
-                                {art.image ? (
-                                    <img
-                                        src={art.image}
-                                        alt={art.title}
-                                        className="w-full h-full min-h-[90px] object-cover"
-                                    />
-                                ) : (
-                                    <GradientPlaceholder category={art.category} className="w-full h-full min-h-[90px]" />
-                                )}
-                            </div>
-                            <div className="flex flex-col justify-center py-3 pr-3 gap-1.5">
-                                <CategoryBadge category={art.category} size="xs" />
-                                <h3 className="text-sm font-bold leading-tight text-gray-800 dark:text-gray-100 group-hover:text-red-600 dark:group-hover:text-red-400 line-clamp-2 transition-colors">
-                                    {art.title}
-                                </h3>
-                                <p className="text-xs text-gray-500 dark:text-gray-400 line-clamp-2 hidden sm:block">{art.excerpt}</p>
-                                <span className="text-[10px] text-gray-400 flex items-center gap-1">
-                                    <Clock className="size-2.5" />
-                                    {art.published_at}
-                                </span>
-                            </div>
-                        </a>
-                    ))}
-                    <button className="w-full rounded-xl border border-dashed border-gray-300 py-3 text-sm font-semibold text-gray-500 hover:border-red-400 hover:text-red-600 dark:border-gray-600 dark:text-gray-400 transition-colors flex items-center justify-center gap-2">
-                        Lihat Semua Berita <ChevronRight className="size-4" />
-                    </button>
+                    {displayedArticles.length > 0 ? (
+                        displayedArticles.map((art) => (
+                            <a key={art.id} href={`/news/${art.slug ?? art.id}`} className="group flex gap-3 rounded-xl bg-white dark:bg-gray-800 shadow-sm overflow-hidden hover:shadow-md transition-shadow cursor-pointer">
+                                <div className="w-28 shrink-0 sm:w-32">
+                                    {art.image ? (
+                                        <img
+                                            src={art.image}
+                                            alt={art.title}
+                                            className="w-full h-full min-h-[90px] object-cover group-hover:scale-105 transition-transform duration-300"
+                                        />
+                                    ) : (
+                                        <GradientPlaceholder category={art.category} className="w-full h-full min-h-[90px]" />
+                                    )}
+                                </div>
+                                <div className="flex flex-col justify-center py-3 pr-3 gap-1.5 min-w-0">
+                                    <div>
+                                        <CategoryBadge category={art.category} size="xs" />
+                                    </div>
+                                    <h3 className="text-sm font-bold leading-tight text-gray-800 dark:text-gray-100 group-hover:text-red-600 dark:group-hover:text-red-400 line-clamp-2 transition-colors">
+                                        {art.title}
+                                    </h3>
+                                    <p className="text-xs text-gray-500 dark:text-gray-400 line-clamp-2 hidden sm:block">{art.excerpt}</p>
+                                    <span className="text-[10px] text-gray-400 flex items-center gap-1">
+                                        <Clock className="size-2.5" />
+                                        {art.published_at}
+                                    </span>
+                                </div>
+                            </a>
+                        ))
+                    ) : (
+                        <div className="rounded-xl border border-dashed border-gray-200 dark:border-gray-700 p-6 text-center bg-white/50 dark:bg-gray-800/50">
+                            <p className="text-xs text-gray-500 dark:text-gray-400">Belum ada berita terbaru untuk kategori <span className="font-semibold text-gray-700 dark:text-gray-200">{activeTab}</span>.</p>
+                        </div>
+                    )}
+
+                    <Link
+                        href={activeTab !== 'Semua' && activeTab !== 'Lainnya' ? `/berita?category=${encodeURIComponent(activeTab)}` : '/berita'}
+                        className="w-full rounded-xl border border-dashed border-gray-300 py-3 text-sm font-semibold text-gray-500 hover:border-red-400 hover:text-red-600 hover:bg-red-50/40 dark:border-gray-600 dark:text-gray-400 dark:hover:border-red-500 dark:hover:text-red-400 dark:hover:bg-red-950/20 transition-all flex items-center justify-center gap-2 group shadow-2xs"
+                    >
+                        <span>Lihat Semua Berita {activeTab !== 'Semua' && activeTab !== 'Lainnya' ? `(${activeTab})` : ''}</span>
+                        <ChevronRight className="size-4 transition-transform group-hover:translate-x-1" />
+                    </Link>
                 </div>
             </div>
 
@@ -151,9 +175,9 @@ export function NewsSections({
                             <div className="h-5 w-1 rounded bg-blue-600" />
                             <h3 className="text-sm font-black uppercase tracking-wide text-gray-800 dark:text-gray-100">Video Story</h3>
                         </div>
-                        <button className="text-[10px] font-semibold text-red-600 hover:underline flex items-center gap-0.5">
+                        <Link href="/videos" className="text-[10px] font-semibold text-red-600 hover:underline flex items-center gap-0.5">
                             Lihat Semua <ChevronRight className="size-3" />
-                        </button>
+                        </Link>
                     </div>
                     <div className="grid grid-cols-2 gap-2">
                         {shortVideos.slice(0, 4).map((v) => (

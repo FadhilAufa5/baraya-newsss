@@ -20,6 +20,8 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', [WelcomeController::class, 'index'])->name('home');
 Route::get('videos', [ShortVideoController::class, 'publicIndex'])->name('videos.index');
+Route::get('berita', [NewsController::class, 'publicIndex'])->name('news.public');
+Route::get('indeks', [NewsController::class, 'publicIndex'])->name('news.indeks');
 
 // ── Authenticated routes ──────────────────────────────────────────────────────
 

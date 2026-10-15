@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link, usePage } from '@inertiajs/react';
+import { Link, usePage, router } from '@inertiajs/react';
 import {
     Menu,
     X,
@@ -82,6 +82,11 @@ export function Header({
     };
 
     const handleCategoryClick = (categoryName: string) => {
+        if (categoryName === 'Indeks') {
+            router.get('/berita');
+            setMobileMenuOpen(false);
+            return;
+        }
         setActiveCategory(categoryName);
         setMobileMenuOpen(false);
     };

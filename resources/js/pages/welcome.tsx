@@ -51,6 +51,23 @@ interface Ad {
     position: 'top' | 'middle' | 'sidebar';
 }
 
+interface PaginationLink {
+    url: string | null;
+    label: string;
+    active: boolean;
+}
+
+interface PaginatedArticles {
+    data: Article[];
+    current_page: number;
+    last_page: number;
+    per_page: number;
+    total: number;
+    from: number | null;
+    to: number | null;
+    links: PaginationLink[];
+}
+
 interface Props {
     heroArticle: Article | null;
     sideArticles: Article[];
@@ -59,7 +76,7 @@ interface Props {
     beritaTerpopuler: { id: number; title: string; slug: string; published_at: string | null; views: number }[];
     trendingItems: string[];
     shortVideos: ShortVideoItem[];
-    filteredArticles: Article[];
+    filteredArticles: PaginatedArticles | Article[] | null;
     filters: { search?: string; category?: string };
     ads: Ad[];
 }
@@ -140,7 +157,15 @@ export default function Welcome({
         ...a,
         published_at: formatDate(a.published_at),
     })); 
-    const filteredNorm = filteredArticles.map(normalise);
+    const pagination = filteredArticles && typeof filteredArticles === 'object' && 'data' in filteredArticles
+        ? (filteredArticles as PaginatedArticles)
+        : null;
+
+    const rawFiltered = pagination
+        ? pagination.data
+        : (Array.isArray(filteredArticles) ? filteredArticles : []);
+
+    const filteredNorm = rawFiltered.map(normalise);
 
     // Fallback trending items if no real data yet ───────────────────────────
     const trendingFinal = trendingItems.length > 0
@@ -277,66 +302,107 @@ export default function Welcome({
                                             : `Kategori: ${activeCategory}`}
                                     </h2>
                                     <span className="text-xs text-gray-500 font-medium">
-                                        {filteredNorm.length} Berita ditemukan
+                                        {pagination ? `${pagination.total} Berita ditemukan` : `${filteredNorm.length} Berita ditemukan`}
                                     </span>
                                 </div>
 
                                 {filteredNorm.length > 0 ? (
-                                    <div className="space-y-6">
-                                        {filteredNorm.map((article) => (
-                                            <article
-                                                key={article.id}
-                                                className="group flex flex-col sm:flex-row gap-4 sm:gap-5 bg-white dark:bg-gray-950 p-4 rounded-xl border border-gray-200 dark:border-gray-850 shadow-sm hover:shadow-md transition-all duration-300"
-                                            >
-                                                <div className="relative w-full sm:w-48 h-40 sm:h-32 shrink-0 rounded-lg overflow-hidden border border-gray-100 dark:border-gray-800">
-                                                    {article.image ? (
-                                                        <img
-                                                            src={article.image}
-                                                            alt={article.title}
-                                                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                                                        />
-                                                    ) : (
-                                                        <GradientPlaceholder
-                                                            category={article.category}
-                                                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                                                        />
-                                                    )}
-                                                    <div className="absolute top-2 left-2 bg-red-600 text-white text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded shadow-sm z-10">
-                                                        {article.category}
-                                                    </div>
-                                                </div>
-
-                                                <div className="flex-1 flex flex-col justify-between space-y-3 sm:space-y-2">
-                                                    <div className="space-y-1.5">
-                                                        <h3 className="text-sm font-bold text-gray-900 dark:text-white group-hover:text-red-600 dark:group-hover:text-red-500 transition-colors duration-200 leading-snug line-clamp-2">
-                                                            <a href={`/news/${article.slug}`}>{article.title}</a>
-                                                        </h3>
-                                                        <p className="text-xs text-gray-500 dark:text-gray-400 line-clamp-2 leading-relaxed">
-                                                            {article.excerpt}
-                                                        </p>
+                                    <>
+                                        <div className="space-y-6">
+                                            {filteredNorm.map((article) => (
+                                                <article
+                                                    key={article.id}
+                                                    className="group flex flex-col sm:flex-row gap-4 sm:gap-5 bg-white dark:bg-gray-950 p-4 rounded-xl border border-gray-200 dark:border-gray-850 shadow-sm hover:shadow-md transition-all duration-300"
+                                                >
+                                                    <div className="relative w-full sm:w-48 h-40 sm:h-32 shrink-0 rounded-lg overflow-hidden border border-gray-100 dark:border-gray-800">
+                                                        {article.image ? (
+                                                            <img
+                                                                src={article.image}
+                                                                alt={article.title}
+                                                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                                                            />
+                                                        ) : (
+                                                            <GradientPlaceholder
+                                                                category={article.category}
+                                                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                                                            />
+                                                        )}
+                                                        <div className="absolute top-2 left-2 bg-red-600 text-white text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded shadow-sm z-10">
+                                                            {article.category}
+                                                        </div>
                                                     </div>
 
-                                                    <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1 text-[10px] text-gray-400 dark:text-gray-500 font-semibold pt-1 border-t border-gray-50 dark:border-gray-900 sm:border-0">
-                                                        <span>{article.author}</span>
-                                                        <span>•</span>
-                                                        <span>{article.published_at}</span>
-                                                        {article.views !== undefined && (
-                                                            <>
-                                                                <span>•</span>
-                                                                <span>{article.views.toLocaleString('id-ID')} views</span>
-                                                            </>
-                                                        )}
-                                                        {article.reading_time !== undefined && (
-                                                            <>
-                                                                <span>•</span>
-                                                                <span>{article.reading_time} mnt baca</span>
-                                                            </>
-                                                        )}
+                                                    <div className="flex-1 flex flex-col justify-between space-y-3 sm:space-y-2">
+                                                        <div className="space-y-1.5">
+                                                            <h3 className="text-sm font-bold text-gray-900 dark:text-white group-hover:text-red-600 dark:group-hover:text-red-500 transition-colors duration-200 leading-snug line-clamp-2">
+                                                                <a href={`/news/${article.slug}`}>{article.title}</a>
+                                                            </h3>
+                                                            <p className="text-xs text-gray-500 dark:text-gray-400 line-clamp-2 leading-relaxed">
+                                                                {article.excerpt}
+                                                            </p>
+                                                        </div>
+
+                                                        <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1 text-[10px] text-gray-400 dark:text-gray-500 font-semibold pt-1 border-t border-gray-50 dark:border-gray-900 sm:border-0">
+                                                            <span>{article.author}</span>
+                                                            <span>•</span>
+                                                            <span>{article.published_at}</span>
+                                                            {article.views !== undefined && (
+                                                                <>
+                                                                    <span>•</span>
+                                                                    <span>{article.views.toLocaleString('id-ID')} views</span>
+                                                                </>
+                                                            )}
+                                                            {article.reading_time !== undefined && (
+                                                                <>
+                                                                    <span>•</span>
+                                                                    <span>{article.reading_time} mnt baca</span>
+                                                                </>
+                                                            )}
+                                                        </div>
                                                     </div>
-                                                </div>
-                                            </article>
-                                        ))}
-                                    </div>
+                                                </article>
+                                            ))}
+                                        </div>
+
+                                        {/* Pagination */}
+                                        {pagination && pagination.last_page > 1 && (
+                                            <div className="flex flex-wrap items-center justify-center gap-1.5 pt-8 border-t border-gray-100 dark:border-gray-850">
+                                                {pagination.links.map((link, i) => {
+                                                    const cleanLabel = link.label
+                                                        .replace('&laquo; Previous', '‹ Sebelumnya')
+                                                        .replace('Next &raquo;', 'Berikutnya ›')
+                                                        .replace('&laquo;', '‹')
+                                                        .replace('&raquo;', '›');
+
+                                                    if (!link.url) {
+                                                        return (
+                                                            <span
+                                                                key={i}
+                                                                className="min-w-9 h-9 flex items-center justify-center px-3 text-xs font-semibold rounded-lg border border-gray-200 dark:border-gray-800 text-gray-400 dark:text-gray-600 cursor-not-allowed select-none bg-gray-50/50 dark:bg-gray-900/50"
+                                                            >
+                                                                {cleanLabel}
+                                                            </span>
+                                                        );
+                                                    }
+
+                                                    return (
+                                                        <button
+                                                            key={i}
+                                                            onClick={() => router.get(link.url!, {}, { preserveState: true, preserveScroll: false })}
+                                                            className={`min-w-9 h-9 flex items-center justify-center px-3 text-xs font-bold rounded-lg border transition-all ${
+                                                                link.active
+                                                                    ? 'border-red-600 bg-red-600 text-white shadow-sm shadow-red-600/30'
+                                                                    : 'border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-950 text-gray-700 dark:text-gray-300 hover:border-red-500 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50/40 dark:hover:bg-red-950/20'
+                                                            }`}
+                                                            aria-label={`Halaman ${cleanLabel}`}
+                                                        >
+                                                            {cleanLabel}
+                                                        </button>
+                                                    );
+                                                })}
+                                            </div>
+                                        )}
+                                    </>
                                 ) : (
                                     <div className="flex flex-col items-center justify-center py-16 text-center space-y-4 bg-white dark:bg-gray-950 rounded-xl border border-gray-200 dark:border-gray-850 p-8 shadow-sm">
                                         <div className="p-4 bg-gray-50 dark:bg-gray-900 rounded-full border border-gray-100 dark:border-gray-800">

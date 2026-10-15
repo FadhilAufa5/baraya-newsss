@@ -51,7 +51,7 @@ export default function Dashboard({
                     <div className="flex items-center gap-3">
                         <Select
                             value={filters.period || 'week'}
-                            onValueChange={(value) => {
+                            onValueChange={(value) => { 
                                 router.get(dashboard(), { period: value }, { preserveState: true, preserveScroll: true });
                             }}
                         >

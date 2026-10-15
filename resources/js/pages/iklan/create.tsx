@@ -21,7 +21,7 @@ export default function CreateAd() {
         ends_at: '',
     });
 
-    const handleChange = <K extends keyof AdFormData>(key: K, value: AdFormData[K]) => setData(key, value);
+    const handleChange = <K extends keyof AdFormData>(key: K, value: AdFormData[K]) => setData(key as any, value as any);
     const submit = () => post('/iklan');
 
     return (

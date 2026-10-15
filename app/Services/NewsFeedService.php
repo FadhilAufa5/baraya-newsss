@@ -12,7 +12,7 @@ class NewsFeedService
     /**
      * Get all data needed for the public welcome/homepage feed.
      */
-    public function getFeedData(string $search, string $category): array
+    public function getFeedData(string $search, string $category, int $perPage = 8): array
     {
         // ── Base published query ──────────────────────────────────────────
         $base = News::published()->with('user');
@@ -29,43 +29,59 @@ class NewsFeedService
             $base->where('category', $category);
         }
 
-        // ── Hero: 1 featured article (or most recent) ────────────────────
-        $heroArticle = (clone $base)
-            ->where('is_featured', true)
-            ->latest('published_at')
-            ->first()
-            ?? (clone $base)->latest('published_at')->first();
+        $isFiltering = (bool) ($search || ($category && $category !== 'Home' && $category !== 'Indeks'));
 
-        // ── Side: 4 articles after hero ───────────────────────────────────
-        $sideArticles = (clone $base)
-            ->latest('published_at')
-            ->when($heroArticle, fn ($q) => $q->where('id', '!=', $heroArticle->id))
-            ->limit(4)
-            ->get();
+        if ($isFiltering) {
+            $filteredArticles = (clone $base)
+                ->latest('published_at')
+                ->paginate($perPage)
+                ->withQueryString();
 
-        // ── Berita Terbaru: next 3 (exclude hero + side) ──────────────────
-        $excludeIds = collect([$heroArticle?->id])
-            ->merge($sideArticles->pluck('id'))
-            ->filter()
-            ->values()
-            ->all();
+            $heroArticle = null;
+            $sideArticles = collect();
+            $beritaTerbaru = collect();
+            $pilihanRedaksi = null;
+        } else {
+            $filteredArticles = null;
 
-        $beritaTerbaru = (clone $base)
-            ->latest('published_at')
-            ->whereNotIn('id', $excludeIds)
-            ->limit(3)
-            ->get();
+            // ── Hero: 1 featured article (or most recent) ────────────────────
+            $heroArticle = (clone $base)
+                ->where('is_featured', true)
+                ->latest('published_at')
+                ->first()
+                ?? (clone $base)->latest('published_at')->first();
 
-        // ── Pilihan Redaksi: featured or most recent ──────────────────────
-        $pilihanRedaksi = News::published()
-            ->where('is_featured', true)
-            ->when($heroArticle, fn ($q) => $q->where('id', '!=', $heroArticle?->id))
-            ->latest('published_at')
-            ->first()
-            ?? News::published()
-            ->when($heroArticle, fn ($q) => $q->where('id', '!=', $heroArticle?->id))
-            ->latest('published_at')
-            ->first();
+            // ── Side: 4 articles after hero ───────────────────────────────────
+            $sideArticles = (clone $base)
+                ->latest('published_at')
+                ->when($heroArticle, fn ($q) => $q->where('id', '!=', $heroArticle->id))
+                ->limit(4)
+                ->get();
+
+            // ── Berita Terbaru: next 3 (exclude hero + side) ──────────────────
+            $excludeIds = collect([$heroArticle?->id])
+                ->merge($sideArticles->pluck('id'))
+                ->filter()
+                ->values()
+                ->all();
+
+            $beritaTerbaru = (clone $base)
+                ->latest('published_at')
+                ->whereNotIn('id', $excludeIds)
+                ->limit(3)
+                ->get();
+
+            // ── Pilihan Redaksi: featured or most recent ──────────────────────
+            $pilihanRedaksi = News::published()
+                ->where('is_featured', true)
+                ->when($heroArticle, fn ($q) => $q->where('id', '!=', $heroArticle?->id))
+                ->latest('published_at')
+                ->first()
+                ?? News::published()
+                ->when($heroArticle, fn ($q) => $q->where('id', '!=', $heroArticle?->id))
+                ->latest('published_at')
+                ->first();
+        }
 
         // ── Berita Terpopuler: top 5 by views ─────────────────────────────
         $beritaTerpopuler = News::published()
@@ -85,11 +101,6 @@ class NewsFeedService
             ->latest('published_at')
             ->limit(4)
             ->get();
-
-        // ── Filtered articles for category/search listing ─────────────────
-        $filteredArticles = ($search || ($category && $category !== 'Home' && $category !== 'Indeks'))
-            ? (clone $base)->latest('published_at')->limit(20)->get()
-            : collect();
 
         // ── Active Ads ────────────────────────────────────────────────────
         $ads = Ad::active()
