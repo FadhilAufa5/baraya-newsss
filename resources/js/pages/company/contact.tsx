@@ -1,6 +1,16 @@
 import React, { useState } from 'react';
 import { CompanyLayout, ArticleSidebarItem } from './company-layout';
-import { Mail, Phone, MapPin, Clock, Send, CheckCircle2, MessageSquare } from 'lucide-react';
+import {
+    Mail,
+    Phone,
+    MapPin,
+    Send,
+    CheckCircle2,
+    MessageSquare,
+    Copy,
+    Check,
+    ExternalLink,
+} from 'lucide-react';
 
 interface Props {
     beritaTerpopuler?: ArticleSidebarItem[];
@@ -13,6 +23,7 @@ export default function ContactPage({
     beritaTerbaru = [],
     trendingItems = [],
 }: Props) {
+    const [copied, setCopied] = useState(false);
     const [formSubmitted, setFormSubmitted] = useState(false);
     const [formData, setFormData] = useState({
         name: '',
@@ -20,6 +31,14 @@ export default function ContactPage({
         subject: 'Redaksi',
         message: '',
     });
+
+    const fullAddress = 'Jl. Dr. Semeru, Gang Kelor No. 26 RT 2/10, Kel. Menteng, Kec. Bogor Barat, 16111';
+
+    const handleCopyAddress = () => {
+        navigator.clipboard.writeText(fullAddress);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+    };
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -29,8 +48,8 @@ export default function ContactPage({
 
     return (
         <CompanyLayout
-            title="Kontak & Kantor"
-            subtitle="Hubungi tim redaksi, layanan kemitraan iklan, atau kunjungi kantor Baraya News."
+            title="Kontak"
+            subtitle="Informasi resmi kontak redaksi, iklan, dan kantor PT. Kreasi Baraya Mandiri."
             activeSlug="contact"
             lastUpdated="16 Oktober 2026"
             beritaTerpopuler={beritaTerpopuler}
@@ -38,167 +57,225 @@ export default function ContactPage({
             trendingItems={trendingItems}
         >
             <div className="space-y-8 text-sm">
-                {/* Contact Cards Grid */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    {/* Alamat */}
-                    <div className="rounded-xl border border-gray-100 dark:border-gray-800 bg-gray-50/70 dark:bg-gray-800/40 p-5 flex items-start gap-3.5">
-                        <div className="p-2.5 rounded-lg bg-red-600 text-white shrink-0">
-                            <MapPin className="size-5" />
-                        </div>
-                        <div>
-                            <h3 className="font-bold text-gray-900 dark:text-white text-sm">Kantor Redaksi</h3>
-                            <p className="mt-1 text-xs text-gray-600 dark:text-gray-400 leading-relaxed">
-                                Gedung Baraya Mandiri, Lt. 3<br />
-                                Jl. Asia Afrika No. 128, Braga, Sumur Bandung<br />
-                                Kota Bandung, Jawa Barat 40112
-                            </p>
-                        </div>
+                {/* ── LOGO (DI LUAR CARD) ─────────────────────────────────── */}
+                <div className="flex items-center justify-between border-b border-gray-100 dark:border-gray-800 pb-4">
+                    <img
+                        src="/logobaraya.png"
+                        alt="Logo Baraya News"
+                        className="h-10 sm:h-12 w-auto object-contain"
+                    />
+                    <span className="text-xs text-gray-500 dark:text-gray-400 font-medium">
+                        Portal Berita Jawa Barat
+                    </span>
+                </div>
+
+                {/* ── KARTU KONTAK (SIMPLE & CLEAN) ────────────────────────── */}
+                <div className="rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-6 sm:p-7 shadow-xs">
+                    {/* Header Kartu */}
+                    <div className="border-b border-gray-100 dark:border-gray-800 pb-4 mb-5">
+                        <span className="text-[11px] font-bold text-red-600 dark:text-red-400 uppercase tracking-wider">
+                            Penerbit & Kantor Redaksi
+                        </span>
+                        <h2 className="text-lg font-bold text-gray-900 dark:text-white mt-0.5">
+                            PT. Kreasi Baraya Mandiri
+                        </h2>
                     </div>
 
-                    {/* Email */}
-                    <div className="rounded-xl border border-gray-100 dark:border-gray-800 bg-gray-50/70 dark:bg-gray-800/40 p-5 flex items-start gap-3.5">
-                        <div className="p-2.5 rounded-lg bg-red-600 text-white shrink-0">
-                            <Mail className="size-5" />
-                        </div>
-                        <div className="min-w-0">
-                            <h3 className="font-bold text-gray-900 dark:text-white text-sm">Email Resmi</h3>
-                            <div className="mt-1 space-y-1 text-xs text-gray-600 dark:text-gray-400">
-                                <div>Redaksi: <a href="mailto:redaksi@barayanews.co.id" className="text-red-600 hover:underline font-medium">redaksi@barayanews.co.id</a></div>
-                                <div>Iklan & Bisnis: <a href="mailto:iklan@barayanews.co.id" className="text-red-600 hover:underline font-medium">iklan@barayanews.co.id</a></div>
+                    {/* Informasi Alamat & Kontak */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        {/* Alamat */}
+                        <div className="space-y-2">
+                            <div className="flex items-center gap-1.5 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                <MapPin className="size-3.5 text-red-600" />
+                                <span>Alamat</span>
+                            </div>
+                            <div className="text-sm text-gray-800 dark:text-gray-200 leading-relaxed">
+                                <p>Jl. Dr. Semeru, Gang Kelor No. 26 RT 2/10</p>
+                                <p>Kel. Menteng, Kec. Bogor Barat</p>
+                                <p className="font-semibold text-gray-900 dark:text-white mt-1">
+                                    16111
+                                </p>
+                            </div>
+                            <div className="flex items-center gap-3 pt-2 text-xs">
+                                <button
+                                    onClick={handleCopyAddress}
+                                    className="inline-flex items-center gap-1 text-gray-500 hover:text-red-600 dark:text-gray-400 dark:hover:text-red-400 transition-colors cursor-pointer"
+                                >
+                                    {copied ? (
+                                        <>
+                                            <Check className="size-3 text-emerald-600" />
+                                            <span className="text-emerald-600 font-medium">Tersalin</span>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <Copy className="size-3" />
+                                            <span>Salin Alamat</span>
+                                        </>
+                                    )}
+                                </button>
+                                <span>•</span>
+                                <a
+                                    href="https://maps.google.com/?q=Jl.+Dr.+Semeru+Gang+Kelor+No.+26+Bogor+Barat"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="inline-flex items-center gap-1 text-red-600 dark:text-red-400 hover:underline font-medium"
+                                >
+                                    <span>Google Maps</span>
+                                    <ExternalLink className="size-3" />
+                                </a>
                             </div>
                         </div>
-                    </div>
 
-                    {/* Telepon / Hotline */}
-                    <div className="rounded-xl border border-gray-100 dark:border-gray-800 bg-gray-50/70 dark:bg-gray-800/40 p-5 flex items-start gap-3.5">
-                        <div className="p-2.5 rounded-lg bg-red-600 text-white shrink-0">
-                            <Phone className="size-5" />
-                        </div>
-                        <div>
-                            <h3 className="font-bold text-gray-900 dark:text-white text-sm">Hotline & WhatsApp</h3>
-                            <p className="mt-1 text-xs text-gray-600 dark:text-gray-400 leading-relaxed">
-                                Telp: (022) 8765-4321<br />
-                                WhatsApp Redaksi: +62 812-3456-7890
-                            </p>
-                        </div>
-                    </div>
+                        {/* Kontak */}
+                        <div className="space-y-3.5 border-t md:border-t-0 md:border-l border-gray-100 dark:border-gray-800 pt-4 md:pt-0 md:pl-6">
+                            <div>
+                                <span className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider block mb-1">
+                                    Redaksi & Informasi Iklan
+                                </span>
+                                <div className="flex items-center gap-2 text-sm">
+                                    <Phone className="size-3.5 text-red-600 shrink-0" />
+                                    <span className="text-gray-600 dark:text-gray-400 text-xs">Telepon/WA:</span>
+                                    <a
+                                        href="https://wa.me/6281299264494"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="font-bold text-gray-900 dark:text-white hover:text-red-600 dark:hover:text-red-400"
+                                    >
+                                        081299264494
+                                    </a>
+                                </div>
+                            </div>
 
-                    {/* Jam Operasional */}
-                    <div className="rounded-xl border border-gray-100 dark:border-gray-800 bg-gray-50/70 dark:bg-gray-800/40 p-5 flex items-start gap-3.5">
-                        <div className="p-2.5 rounded-lg bg-red-600 text-white shrink-0">
-                            <Clock className="size-5" />
-                        </div>
-                        <div>
-                            <h3 className="font-bold text-gray-900 dark:text-white text-sm">Jam Operasional</h3>
-                            <p className="mt-1 text-xs text-gray-600 dark:text-gray-400 leading-relaxed">
-                                Peliputan Berita: 24 Jam Nonstop<br />
-                                Layanan Bisnis & Kantor: Senin – Jumat (09.00 – 17.00 WIB)
-                            </p>
+                            <div className="space-y-2 text-xs">
+                                <div className="flex items-start gap-2">
+                                    <Mail className="size-3.5 text-red-600 shrink-0 mt-0.5" />
+                                    <div>
+                                        <span className="text-gray-500 dark:text-gray-400 mr-1.5">Redaksi:</span>
+                                        <a
+                                            href="mailto:barayanewsbogor@gmail.com"
+                                            className="font-medium text-gray-900 dark:text-gray-100 hover:text-red-600 dark:hover:text-red-400"
+                                        >
+                                            barayanewsbogor@gmail.com
+                                        </a>
+                                    </div>
+                                </div>
+
+                                <div className="flex items-start gap-2">
+                                    <Mail className="size-3.5 text-red-600 shrink-0 mt-0.5" />
+                                    <div>
+                                        <span className="text-gray-500 dark:text-gray-400 mr-1.5">Iklan:</span>
+                                        <a
+                                            href="mailto:kreasibarayamandiri.pt@gmail.com"
+                                            className="font-medium text-gray-900 dark:text-gray-100 hover:text-red-600 dark:hover:text-red-400"
+                                        >
+                                            kreasibarayamandiri.pt@gmail.com
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                {/* Form Kirim Pesan */}
-                <div className="rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-6 sm:p-7">
-                    <div className="flex items-center gap-2 mb-2 font-bold text-base text-gray-900 dark:text-white">
-                        <MessageSquare className="size-5 text-red-600" />
-                        <h2>Kirim Pesan ke Redaksi</h2>
+                {/* ── FORMULIR PESAN ──────────────────────────────────────── */}
+                <div className="rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-6 shadow-xs">
+                    <div className="flex items-center gap-2 mb-2 font-bold text-sm text-gray-900 dark:text-white">
+                        <MessageSquare className="size-4 text-red-600" />
+                        <h2>Kirim Pesan</h2>
                     </div>
-                    <p className="text-xs text-gray-500 dark:text-gray-400 mb-6">
-                        Punya saran liputan, informasi penting, atau pertanyaan kerjasama? Tuliskan pesan Anda di bawah ini:
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mb-5">
+                        Tinggalkan pesan, informasi liputan, atau penawaran kerjasama:
                     </p>
 
                     {formSubmitted ? (
-                        <div className="rounded-xl border border-emerald-200 bg-emerald-50 dark:border-emerald-900/60 dark:bg-emerald-950/30 p-6 text-center space-y-2">
-                            <CheckCircle2 className="size-10 text-emerald-600 dark:text-emerald-400 mx-auto" />
-                            <h3 className="text-base font-bold text-emerald-900 dark:text-emerald-200">
-                                Pesan Anda Berhasil Dikirim!
+                        <div className="rounded-lg border border-emerald-200 bg-emerald-50 dark:border-emerald-900/50 dark:bg-emerald-950/20 p-5 text-center space-y-1.5">
+                            <CheckCircle2 className="size-7 text-emerald-600 dark:text-emerald-400 mx-auto" />
+                            <h3 className="text-sm font-bold text-emerald-900 dark:text-emerald-200">
+                                Pesan Terkirim
                             </h3>
-                            <p className="text-xs text-emerald-800/80 dark:text-emerald-400/90 max-w-md mx-auto">
-                                Terima kasih telah menghubungi Baraya News. Tim kami akan meninjau pesan Anda dan segera membalas ke email yang Anda cantumkan.
+                            <p className="text-xs text-emerald-800/80 dark:text-emerald-400/90">
+                                Terima kasih, pesan Anda telah diterima dan akan segera direspons oleh tim kami.
                             </p>
                             <button
                                 onClick={() => {
                                     setFormSubmitted(false);
                                     setFormData({ name: '', email: '', subject: 'Redaksi', message: '' });
                                 }}
-                                className="mt-3 inline-flex items-center text-xs font-bold text-emerald-700 dark:text-emerald-300 underline hover:no-underline cursor-pointer"
+                                className="mt-2 text-xs font-semibold text-emerald-700 dark:text-emerald-300 underline cursor-pointer"
                             >
-                                Kirim pesan lainnya
+                                Kirim pesan lain
                             </button>
                         </div>
                     ) : (
                         <form onSubmit={handleSubmit} className="space-y-4">
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                <div className="space-y-1.5">
-                                    <label htmlFor="contact-name" className="text-xs font-semibold text-gray-700 dark:text-gray-300">
-                                        Nama Lengkap <span className="text-red-600">*</span>
+                                <div className="space-y-1">
+                                    <label htmlFor="name" className="text-xs font-medium text-gray-700 dark:text-gray-300">
+                                        Nama Lengkap
                                     </label>
                                     <input
-                                        id="contact-name"
+                                        id="name"
                                         type="text"
                                         required
                                         placeholder="Nama Anda"
                                         value={formData.name}
                                         onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                                        className="w-full rounded-xl border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 px-3.5 py-2 text-xs text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-red-500/30"
+                                        className="w-full rounded-lg border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 px-3 py-2 text-xs text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-red-500"
                                     />
                                 </div>
-                                <div className="space-y-1.5">
-                                    <label htmlFor="contact-email" className="text-xs font-semibold text-gray-700 dark:text-gray-300">
-                                        Alamat Email <span className="text-red-600">*</span>
+                                <div className="space-y-1">
+                                    <label htmlFor="email" className="text-xs font-medium text-gray-700 dark:text-gray-300">
+                                        Email
                                     </label>
                                     <input
-                                        id="contact-email"
+                                        id="email"
                                         type="email"
                                         required
-                                        placeholder="nama@email.com"
+                                        placeholder="email@anda.com"
                                         value={formData.email}
                                         onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                                        className="w-full rounded-xl border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 px-3.5 py-2 text-xs text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-red-500/30"
+                                        className="w-full rounded-lg border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 px-3 py-2 text-xs text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-red-500"
                                     />
                                 </div>
                             </div>
 
-                            <div className="space-y-1.5">
-                                <label htmlFor="contact-subject" className="text-xs font-semibold text-gray-700 dark:text-gray-300">
-                                    Kategori Pesan
+                            <div className="space-y-1">
+                                <label htmlFor="subject" className="text-xs font-medium text-gray-700 dark:text-gray-300">
+                                    Tujuan
                                 </label>
                                 <select
-                                    id="contact-subject"
+                                    id="subject"
                                     value={formData.subject}
                                     onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
-                                    className="w-full rounded-xl border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 px-3.5 py-2 text-xs text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-red-500/30"
+                                    className="w-full rounded-lg border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 px-3 py-2 text-xs text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-red-500"
                                 >
-                                    <option value="Redaksi">Redaksi / Liputan Berita</option>
-                                    <option value="Kerjasama">Kerjasama Media / Liputan Khusus</option>
-                                    <option value="Iklan">Pemasangan Iklan & Advertorial</option>
-                                    <option value="Pengaduan">Pengaduan Konten / Hak Jawab</option>
-                                    <option value="Lainnya">Lainnya</option>
+                                    <option value="Redaksi">Redaksi (barayanewsbogor@gmail.com)</option>
+                                    <option value="Iklan">Informasi Iklan (kreasibarayamandiri.pt@gmail.com)</option>
+                                    <option value="Kerjasama">Kerjasama</option>
                                 </select>
                             </div>
 
-                            <div className="space-y-1.5">
-                                <label htmlFor="contact-message" className="text-xs font-semibold text-gray-700 dark:text-gray-300">
-                                    Pesan Anda <span className="text-red-600">*</span>
+                            <div className="space-y-1">
+                                <label htmlFor="message" className="text-xs font-medium text-gray-700 dark:text-gray-300">
+                                    Pesan
                                 </label>
                                 <textarea
-                                    id="contact-message"
+                                    id="message"
                                     required
-                                    rows={4}
-                                    placeholder="Tuliskan pesan atau informasi Anda dengan jelas..."
+                                    rows={3}
+                                    placeholder="Tuliskan pesan Anda..."
                                     value={formData.message}
                                     onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-                                    className="w-full rounded-xl border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 px-3.5 py-2 text-xs text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-red-500/30"
+                                    className="w-full rounded-lg border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 px-3 py-2 text-xs text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-red-500"
                                 />
                             </div>
 
                             <button
                                 type="submit"
-                                className="inline-flex items-center gap-2 rounded-xl bg-red-600 px-5 py-2.5 text-xs font-bold text-white hover:bg-red-700 transition-colors shadow-xs cursor-pointer"
+                                className="inline-flex items-center gap-1.5 rounded-lg bg-red-600 px-4 py-2 text-xs font-semibold text-white hover:bg-red-700 transition-colors cursor-pointer"
                             >
                                 <Send className="size-3.5" />
-                                <span>Kirim Pesan</span>
+                                <span>Kirim</span>
                             </button>
                         </form>
                     )}
