@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from '@inertiajs/react';
 import { LayoutGrid } from 'lucide-react';
-import { login, register, dashboard } from '@/routes';
+import { login, dashboard } from '@/routes';
 
 interface FooterProps {
     user: unknown;
@@ -22,42 +22,29 @@ export function Footer({ user }: FooterProps) {
                         <p className="text-xs text-gray-400 leading-relaxed">PT. Kreasi Baraya Mandiri adalah sebuah perusahaan yang bergerak di bidang media yang menaungi website portal berita barayanews.co.id untuk menayangkan berita terkini dan terpercaya.</p>
                     </div>
                     {/* Kategori */}
-                    <div>
-                        <h4 className="text-xs font-bold uppercase tracking-widest text-gray-300 mb-3">Kategori</h4>
-                        <ul className="space-y-1.5">
-                            {['Jawa Barat', 'Nasional', 'Ekonomi', 'Olahraga', 'Teknologi'].map((c) => (
-                                <li key={c}><button className="text-xs text-gray-400 hover:text-red-400 transition-colors">{c}</button></li>
-                            ))}
-                        </ul>
-                    </div>
-                    {/* Tentang */}
+                   
+                    {/* Tentang / Perusahaan */}
                     <div>
                         <h4 className="text-xs font-bold uppercase tracking-widest text-gray-300 mb-3">Perusahaan</h4>
                         <ul className="space-y-1.5">
-                            {['Tentang Kami', 'Redaksi', 'Pedoman Media Siber', 'Karir', 'Hubungi Kami'].map((c) => (
-                                <li key={c}><button className="text-xs text-gray-400 hover:text-red-400 transition-colors">{c}</button></li>
+                            {[
+                                { title: 'Kebijakan Privasi', href: '/kebijakan-privasi' },
+                                { title: 'Redaksi', href: '/redaksi' },
+                                { title: 'Pedoman Media Siber', href: '/pedoman-media-siber' },
+                                { title: 'Kontak', href: '/kontak' },
+                                { title: 'Syarat Karya Tulis', href: '/syarat-karya-tulis' },
+                            ].map((item) => (
+                                <li key={item.title}>
+                                    <Link
+                                        href={item.href}
+                                        className="text-xs text-gray-400 hover:text-red-400 transition-colors"
+                                    >
+                                        {item.title}
+                                    </Link>
+                                </li>
                             ))}
                         </ul>
                     </div>
-                    {/* CTA */}
-                    {/* <div>
-                        <h4 className="text-xs font-bold uppercase tracking-widest text-gray-300 mb-3">Bergabung</h4>
-                        <p className="text-xs text-gray-400 mb-4">Jadilah bagian dari komunitas Baraya News.</p>
-                        {user ? (
-                            <Link href={dashboard()} className="inline-flex items-center gap-2 rounded-lg bg-red-600 px-4 py-2 text-sm font-bold text-white hover:bg-red-700 transition-colors">
-                                <LayoutGrid className="size-4" /> Dashboard
-                            </Link>
-                        ) : (
-                            <div className="flex flex-col gap-2">
-                                <Link href={register()} className="inline-flex items-center justify-center rounded-lg bg-red-600 px-4 py-2 text-sm font-bold text-white hover:bg-red-700 transition-colors">
-                                    Daftar Gratis
-                                </Link>
-                                <Link href={login()} className="inline-flex items-center justify-center rounded-lg border border-gray-600 px-4 py-2 text-sm font-semibold text-gray-300 hover:border-gray-400 hover:text-white transition-colors">
-                                    Masuk
-                                </Link>
-                            </div>
-                        )}
-                    </div> */}
                 </div>
                 <div className="mt-8 border-t border-gray-700 pt-6 flex flex-col sm:flex-row items-center justify-between gap-3">
                     <p className="text-[10px] text-gray-500">© 2026 Baraya News. All rights reserved.</p>

@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link, usePage } from '@inertiajs/react';
 import { Bell, Radio, Search, User, Video } from 'lucide-react';
-import { login, register, dashboard } from '@/routes';
+import { login, dashboard } from '@/routes';
 
 export const VIDEO_CATEGORIES = ['Semua', 'Jawa Barat', 'Nasional', 'Olahraga', 'Ekonomi', 'Teknologi', 'Lifestyle'];
 
@@ -70,11 +70,8 @@ export function VideoHeader({
                         </Link>
                     ) : (
                         <div className="flex items-center gap-2">
-                            <Link href={login()} className="hidden sm:inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-800 transition-colors">
+                            <Link href={login()} className="inline-flex items-center gap-1.5 rounded-full bg-red-600 px-4 py-1.5 text-xs font-bold text-white hover:bg-red-700 transition-colors shadow-sm">
                                 <User className="size-3.5" /> Masuk
-                            </Link>
-                            <Link href={register()} className="inline-flex items-center rounded-full bg-red-600 px-4 py-1.5 text-xs font-bold text-white hover:bg-red-700 transition-colors shadow-sm">
-                                Daftar
                             </Link>
                         </div>
                     )}

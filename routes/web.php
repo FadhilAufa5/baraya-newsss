@@ -12,6 +12,7 @@ use App\Http\Controllers\SocialActionController;
 use App\Http\Controllers\CommentActionController;
 use App\Http\Controllers\OAuthController;
 use App\Http\Controllers\UserProfileController;
+use App\Http\Controllers\CompanyPageController;
 use App\Http\Controllers\EmailController;
 use App\Http\Controllers\GalleryController;
 use Illuminate\Support\Facades\Route;
@@ -22,6 +23,14 @@ Route::get('/', [WelcomeController::class, 'index'])->name('home');
 Route::get('videos', [ShortVideoController::class, 'publicIndex'])->name('videos.index');
 Route::get('berita', [NewsController::class, 'publicIndex'])->name('news.public');
 Route::get('indeks', [NewsController::class, 'publicIndex'])->name('news.indeks');
+Route::redirect('register', 'login');
+
+// ── Company / Perusahaan routes ───────────────────────────────────────────────
+Route::get('kebijakan-privasi', [CompanyPageController::class, 'privacy'])->name('company.privacy');
+Route::get('redaksi', [CompanyPageController::class, 'editorial'])->name('company.editorial');
+Route::get('pedoman-media-siber', [CompanyPageController::class, 'cyberGuidelines'])->name('company.cyber-guidelines');
+Route::get('kontak', [CompanyPageController::class, 'contact'])->name('company.contact');
+Route::get('syarat-karya-tulis', [CompanyPageController::class, 'writingTerms'])->name('company.writing-terms');
 
 // ── Authenticated routes ──────────────────────────────────────────────────────
 

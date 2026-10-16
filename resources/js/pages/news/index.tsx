@@ -82,6 +82,22 @@ function formatDate(s: string | null) {
     return new Date(s).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' });
 }
 
+function getPageNumbers(current: number, total: number): (number | '...')[] {
+    if (total <= 7) {
+        return Array.from({ length: total }, (_, i) => i + 1);
+    }
+
+    if (current <= 4) {
+        return [1, 2, 3, 4, 5, '...', total];
+    }
+
+    if (current >= total - 3) {
+        return [1, '...', total - 4, total - 3, total - 2, total - 1, total];
+    }
+
+    return [1, '...', current - 1, current, current + 1, '...', total];
+}
+
 // ─── Delete Confirm Dialog ─────────────────────────────────────────────────────
 
 function DeleteDialog({ article, open, onClose }: { article: Article; open: boolean; onClose: () => void }) {
@@ -350,6 +366,16 @@ export default function NewsIndex({ news, filters, categories }: Props) {
         router.get('/news', {}, { preserveState: false });
     };
 
+    const goToPage = (page: number) => {
+        if (page < 1 || page > news.last_page || page === news.current_page) return;
+        router.get('/news', {
+            ...(filters.search ? { search: filters.search } : {}),
+            ...(filters.category && filters.category !== 'all' ? { category: filters.category } : {}),
+            ...(filters.status && filters.status !== 'all' ? { status: filters.status } : {}),
+            page,
+        }, { preserveState: true });
+    };
+
     const hasFilter = !!(
         filters.search ||
         (filters.category && filters.category !== 'all') ||
@@ -573,44 +599,57 @@ export default function NewsIndex({ news, filters, categories }: Props) {
 
                 {/* ── Pagination ───────────────────────────────────────── */}
                 {news.last_page > 1 && (
-                    <div className="flex items-center justify-between border-t pt-5 mt-2">
+                    <div className="flex flex-col sm:flex-row items-center justify-between gap-4 border-t pt-5 mt-2">
                         <p className="text-sm text-muted-foreground">
                             Halaman <span className="font-semibold text-foreground">{news.current_page}</span>{' '}
                             dari{' '}
                             <span className="font-semibold text-foreground">{news.last_page}</span>
                         </p>
-                        <div className="flex items-center gap-1">
+                        <div className="flex flex-wrap items-center justify-center gap-1">
                             <Button
                                 id="btn-prev"
                                 variant="outline"
                                 size="sm"
                                 className="size-8 p-0 rounded-lg"
-                                disabled={news.current_page === 1}
-                                onClick={() => router.get('/news', { ...filters, page: news.current_page - 1 })}
+                                disabled={news.current_page <= 1}
+                                onClick={() => goToPage(news.current_page - 1)}
+                                aria-label="Halaman sebelumnya"
                             >
                                 <ChevronLeft className="size-4" />
                             </Button>
-                            {news.links
-                                .filter((l) => !l.label.includes('Previous') && !l.label.includes('Next'))
-                                .map((link, i) => (
+                            {getPageNumbers(news.current_page, news.last_page).map((item, idx) =>
+                                item === '...' ? (
+                                    <span
+                                        key={`ellipsis-${idx}`}
+                                        className="flex size-8 items-center justify-center text-xs font-semibold text-muted-foreground select-none"
+                                    >
+                                        …
+                                    </span>
+                                ) : (
                                     <Button
-                                        key={i}
-                                        id={`btn-page-${link.label}`}
-                                        variant={link.active ? 'default' : 'outline'}
+                                        key={`page-${item}`}
+                                        id={`btn-page-${item}`}
+                                        variant={item === news.current_page ? 'default' : 'outline'}
                                         size="sm"
-                                        className={`min-w-8 h-8 rounded-lg text-xs ${link.active ? 'bg-red-600 hover:bg-red-700 border-red-600' : ''}`}
-                                        disabled={!link.url}
-                                        onClick={() => link.url && router.get(link.url)}
-                                        dangerouslySetInnerHTML={{ __html: link.label }}
-                                    />
-                                ))}
+                                        className={`min-w-8 h-8 px-2.5 rounded-lg text-xs font-medium transition-all ${
+                                            item === news.current_page
+                                                ? 'bg-red-600 hover:bg-red-700 text-white border-red-600 shadow-xs'
+                                                : 'hover:border-red-400 hover:text-red-600 dark:hover:text-red-400'
+                                        }`}
+                                        onClick={() => goToPage(item)}
+                                    >
+                                        {item}
+                                    </Button>
+                                )
+                            )}
                             <Button
                                 id="btn-next"
                                 variant="outline"
                                 size="sm"
                                 className="size-8 p-0 rounded-lg"
-                                disabled={news.current_page === news.last_page}
-                                onClick={() => router.get('/news', { ...filters, page: news.current_page + 1 })}
+                                disabled={news.current_page >= news.last_page}
+                                onClick={() => goToPage(news.current_page + 1)}
+                                aria-label="Halaman berikutnya"
                             >
                                 <ChevronRight className="size-4" />
                             </Button>
