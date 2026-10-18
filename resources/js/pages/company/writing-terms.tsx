@@ -88,7 +88,6 @@ export default function WritingTermsPage({
                     </div>
                 </div>
 
-                {/* ── 1. SYARAT UMUM ──────────────────────────────────────── */}
                 <section className="space-y-4">
                     <div className="flex items-center gap-2 border-b border-gray-100 dark:border-gray-800 pb-2">
                         <PenTool className="size-4 text-red-600" />

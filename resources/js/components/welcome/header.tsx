@@ -24,7 +24,6 @@ import {
 } from 'lucide-react';
 import { login, dashboard } from '@/routes';
 import { useAppearance } from '@/hooks/use-appearance';
-import AppLogoIcon from '@/components/app-logo-icon';
 
 export const CATEGORIES = [
     'Home', 'Jawa Barat', 'Nasional', 'Ekonomi', 'Olahraga',
@@ -106,17 +105,12 @@ export function Header({
                 {/* ── Top Bar ────────────────────────────────────────────── */}
                 <div className="mx-auto flex max-w-[1280px] items-center justify-between gap-3 px-4 py-2.5 sm:px-6 sm:py-3">
                     {/* Brand Logo */}
-                    <Link href="/" className="shrink-0 flex items-center gap-2.5 group">
-                        <AppLogoIcon className="h-8 sm:h-9 md:h-10 w-auto transition-transform duration-300 group-hover:scale-105" />
-                        <div>
-                            <div className="flex items-baseline gap-0.5 leading-none">
-                                <span className="font-black text-xl sm:text-2xl text-red-600 tracking-tight">baraya</span>
-                                <span className="font-black text-xl sm:text-2xl text-gray-800 tracking-tight dark:text-white">news</span>
-                            </div>
-                            <div className="hidden xs:block text-[8px] sm:text-[9px] text-gray-400 font-medium tracking-widest uppercase mt-0.5">
-                                Portal Berita Terkini
-                            </div>
-                        </div>
+                    <Link href="/" className="shrink-0 flex items-center group">
+                        <img
+                            src="/logobaraya.png"
+                            alt="Baraya News"
+                            className="h-8 sm:h-9 md:h-10 w-auto object-contain transition-transform duration-300 group-hover:scale-105"
+                        />
                     </Link>
 
                     {/* Desktop Search Bar */}
@@ -297,16 +291,13 @@ export function Header({
                     <div className="relative z-50 flex h-full w-[85%] max-w-sm flex-col justify-between bg-white shadow-2xl transition-transform duration-300 ease-in-out dark:bg-gray-950 border-l border-gray-200 dark:border-gray-800">
                         {/* Drawer Header */}
                         <div className="flex items-center justify-between border-b border-gray-100 px-5 py-4 dark:border-gray-800">
-                            <div className="flex items-center gap-2">
-                                <AppLogoIcon className="h-8 w-auto" />
-                                <div>
-                                    <div className="flex items-baseline gap-0.5 leading-none">
-                                        <span className="font-black text-lg text-red-600 tracking-tight">baraya</span>
-                                        <span className="font-black text-lg text-gray-800 tracking-tight dark:text-white">news</span>
-                                    </div>
-                                    <div className="text-[8px] text-gray-400 font-medium tracking-widest uppercase">Portal Berita Jabar</div>
-                                </div>
-                            </div>
+                            <Link href="/" onClick={() => setMobileMenuOpen(false)} className="flex items-center">
+                                <img
+                                    src="/logobaraya.png"
+                                    alt="Baraya News"
+                                    className="h-8 w-auto object-contain"
+                                />
+                            </Link>
                             <button
                                 onClick={() => setMobileMenuOpen(false)}
                                 className="size-8 flex items-center justify-center rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700 transition-colors"
